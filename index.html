@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مستر هنجر | MR. HUNGER - المنيو الرسمي</title>
+    
+    <meta name="theme-color" content="#be123c">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- مكتبات Firebase اللحظية -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    
+    <style>
+        /* ================= الثيمات المتغيرة ================= */
+        :root, [data-theme="light"] {
+            --bg: linear-gradient(180deg, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%); 
+            --card-inner-bg: #ffffff; 
+            --card-outer-border: #cbd5e1; 
+            --card-text: #0f172a; 
+            --card-desc-text: #475569; 
+            --main-text: #0f172a; 
+            --desc-text: #64748b; 
+            --brand-red: #be123c; 
+            --button-black: #1f1f1f; 
+            --white: #ffffff; 
+            --header-bg: #ffffff; 
+            --card-shadow: 0 6px 16px rgba(15, 23, 42, 0.08); 
+            --border-color: #e2e8f0; 
+            --input-bg: #f8fafc;
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212; 
+            --card-inner-bg: #1e1e1e; 
+            --card-outer-border: #334155; 
+            --card-text: #f8fafc; 
+            --card-desc-text: #94a3b8; 
+            --main-text: #f8fafc; 
+            --desc-text: #cbd5e1; 
+            --brand-red: #be123c; 
+            --button-black: #1f1f1f; 
+            --white: #ffffff; 
+            --header-bg: #1e1e1e; 
+            --card-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); 
+            --border-color: #334155; 
+            --input-bg: #2d3748;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Cairo', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+            transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.2s ease, box-shadow 0.2s ease; 
+        }
+        
+        body { 
+            background: var(--bg); 
+            background-attachment: fixed;
+            color: var(--main-text); 
+            line-height: 1.4; 
+            overflow-x: hidden; 
+            padding-bottom: 90px;
+        }
+
+        /* ================= شاشة التحميل ================= */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #141414; 
+            z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            transition: transform 0.5s ease-out;
+        }
+        
+        .loader-content { text-align: center; padding: 20px; max-width: 90%; display: flex; flex-direction: column; align-items: center; }
+        
+        .loader-logo-final {
+            width: 210px; 
+            height: 210px; 
+            margin-bottom: 20px;
+            background-image: url('./images/logooo.png');
+            background-size: contain; 
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 16px; 
+            animation: bounceInEntry 1s ease forwards;
+        }
+        
+        @keyframes bounceInEntry {
+            0% { transform: scale(0.3); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .loader-slogan { font-size: 1.15rem; font-weight: 800; color: var(--brand-red); text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin-top: 10px; }
+        .loader-counter { font-size: 1.2rem; font-weight: 800; color: #ffffff; margin-top: 15px; font-variant-numeric: tabular-nums; }
+        .loading-bar { width: 180px; height: 7px; background: rgba(255, 255, 255, 0.15); margin: 12px auto 0 auto; border-radius: 10px; overflow: hidden; }
+        .loading-bar span { display: block; width: 0%; height: 100%; background: linear-gradient(90deg, var(--brand-red) 0%, #ff4d6d 100%); box-shadow: 0 0 10px var(--brand-red); border-radius: 10px; transition: width 0.2s ease; }
+        .splash-hidden { transform: translateY(-100%); pointer-events: none; }
+
+        /* ================= الهيدر الداخلي ================= */
+        .sticky-wrapper { position: sticky; top: 0; z-index: 1000; background: var(--header-bg); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); }
+        header { display: flex; flex-direction: column; align-items: center; padding: 10px 0 6px 0; position: relative; }
+        .header-top { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        
+        .header-logo-final { 
+            width: 120px; 
+            height: 120px; 
+            background-image: url('./images/logooo.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 12px;
+        }
+
+        .store-status-banner {
+            width: 100%;
+            text-align: center;
+            padding: 6px 10px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .store-status-banner.open { background: #dcfce7; color: #15803d; border-bottom: 1px solid #bbf7d0; }
+        .store-status-banner.closed { background: #fee2e2; color: #991b1b; border-bottom: 1px solid #fecaca; }
+
+        .header-left-actions { position: absolute; left: 16px; top: 40px; display: flex; align-items: center; }
+        .header-right-actions { position: absolute; right: 16px; top: 40px; display: flex; align-items: center; z-index: 1010; }
+
+        .cart-trigger, .theme-toggle-btn { 
+            background: var(--input-bg); 
+            color: var(--main-text); 
+            width: 42px; 
+            height: 42px; 
+            border-radius: 14px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            border: 1px solid var(--border-color); 
+            position: relative; 
+            outline: none;
+            user-select: none;
+        }
+        
+        .theme-toggle-btn * { pointer-events: none; }
+        .cart-trigger:active, .theme-toggle-btn:active { transform: scale(0.92); }
+
+        .badge { position: absolute; top: -3px; right: -3px; background: var(--brand-red); color: #ffffff; font-size: 8px; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff; transform: scale(0); }
+        .badge.show { transform: scale(1); }
+
+        /* ================= شريط الأقسام ================= */
+        .category-nav { 
+            display: flex; 
+            overflow-x: auto; 
+            white-space: nowrap; 
+            padding: 10px 16px; 
+            gap: 12px; 
+            scrollbar-width: none; 
+            background: var(--header-bg); 
+            border-bottom: 1px solid var(--border-color); 
+        }
+        .category-nav::-webkit-scrollbar { display: none; }
+        
+        .cat-item { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            width: 95px; 
+            flex-shrink: 0;
+            cursor: pointer; 
+        }
+        
+        .cat-img-box { 
+            width: 68px; 
+            height: 68px; 
+            border-radius: 20px; 
+            background: var(--input-bg); 
+            overflow: hidden; 
+            border: 1.5px solid var(--border-color); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cat-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .cat-item.active .cat-img-box { border-color: var(--brand-red); border-width: 2.5px; transform: scale(1.04); }
+        
+        .cat-item span { 
+            font-size: 0.74rem; 
+            font-weight: 800; 
+            color: var(--desc-text); 
+            margin-top: 6px; 
+            text-align: center;
+            width: 100%;
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        } 
+        .cat-item.active span { color: var(--main-text); font-weight: 900; }
+
+        /* ================= قائمة الكروت ================= */
+        .menu-list { display: flex; flex-direction: column; gap: 12px; padding: 16px; max-width: 600px; margin: auto; min-height: 400px; }
+        
+        .food-card { 
+            background: var(--card-inner-bg); 
+            border-radius: 16px; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 12px; 
+            box-shadow: var(--card-shadow); 
+            border: 1px solid var(--card-outer-border); 
+            gap: 6px; 
+            position: relative; 
+        }
+
+        .card-top-content { display: flex; flex-direction: row; align-items: flex-start; gap: 12px; width: 100%; }
+        
+        .card-image-wrapper { 
+            width: 95px; 
+            height: 95px; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            flex-shrink: 0; 
+            background: var(--card-inner-bg); 
+            border: 1px solid var(--card-outer-border); 
+        }
+        
+        .food-card .item-img { width: 100%; height: 100%; object-fit: cover; }
+        .card-details-wrapper { display: flex; flex-direction: column; gap: 4px; text-align: right; flex: 1; min-width: 0; }
+
+        .food-name { font-weight: 800; font-size: 1rem; color: var(--card-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .food-ingredients { font-size: 0.72rem; color: var(--card-desc-text); font-weight: 600; line-height: 1.3; display: block; }
+
+        /* ================= خيارات الحجم ================= */
+        .custom-options-container {
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .option-title {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--desc-text);
+        }
+
+        .simple-option-pills {
+            display: flex;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .simple-pill-btn {
+            flex: 1;
+            padding: 4px 0;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--main-text);
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .simple-pill-btn.active {
+            background: var(--brand-red);
+            color: #ffffff;
+            border-color: var(--brand-red);
+            box-shadow: 0 2px 6px rgba(190, 18, 60, 0.3);
+        }
+
+        .card-bottom-content { 
+            display: flex; 
+            flex-direction: row-reverse; 
+            justify-content: space-between; 
+            align-items: center; 
+            width: 100%; 
+            margin-top: 6px; 
+            padding-top: 8px; 
+            border-top: 1px dashed var(--border-color); 
+        }
+
+        .btn-wrapper { display: flex; align-items: center; margin-right: auto; }
+
+        .add-btn { 
+            background: var(--brand-red); 
+            color: #ffffff; 
+            border: 1px solid transparent; 
+            padding: 0 12px;
+            height: 30px; 
+            border-radius: 8px; 
+            font-size: 0.75rem; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 800; 
+            box-shadow: 0 2px 6px rgba(190, 18, 60, 0.25);
+            white-space: nowrap;
+        }
+
+        .add-btn.out-of-stock-mode { 
+            background: #64748b !important; 
+            color: #ffffff !important; 
+            box-shadow: none !important; 
+            cursor: not-allowed !important; 
+            opacity: 0.8;
+        }
+        
+        .add-btn.success-state { background: #dcfce7 !important; color: #15803d !important; border: 1.5px solid #16a34a !important; pointer-events: none; }
+
+        .price-container-leftish { display: flex; align-items: center; margin-left: auto; padding-right: 2px; }
+        .food-price { font-weight: 900; color: var(--brand-red); font-size: 1.15rem; display: inline-flex; align-items: baseline; gap: 2px; }
+        .price-num { font-weight: 900; }
+        .price-txt { font-size: 0.72rem; font-weight: 800; color: var(--brand-red); }
+
+        /* ================= شريط تتبع الطلب للزبون ================= */
+        .user-order-tracker-bar {
+            position: fixed;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 480px;
+            background: var(--header-bg);
+            border: 2px solid var(--brand-red);
+            border-radius: 16px;
+            padding: 10px 14px;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            z-index: 1800;
+            animation: slideUpIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideUpIn {
+            from { transform: translate(-50%, 100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        .tracker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            font-weight: 800;
+        }
+
+        .tracker-status-tag {
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+
+        .status-prep { background: #fef08a; color: #854d0e; }
+        .status-delivering { background: #bfdbfe; color: #1e40af; }
+        .status-completed { background: #dcfce7; color: #166534; }
+        .status-canceled { background: #fee2e2; color: #991b1b; }
+
+        .chat-btn-trigger {
+            background: var(--brand-red);
+            color: #ffffff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        /* ================= زر اختيار منطقة التوصيل ================= */
+        .select-zone-trigger-btn {
+            width: 100%;
+            padding: 12px 14px;
+            background: #ffffff;
+            border: 1.5px solid var(--brand-red);
+            border-radius: 12px;
+            color: var(--main-text);
+            font-weight: 800;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(190, 18, 60, 0.08);
+        }
+
+        [data-theme="dark"] .select-zone-trigger-btn { background: #1e1e1e; }
+
+        .zone-modal-card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 60vh;
+            overflow-y: auto;
+            margin-top: 12px;
+            padding-left: 2px;
+        }
+
+        .zone-card-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        [data-theme="dark"] .zone-card-item { background: #2a2a2a; }
+
+        .zone-card-item:active, .zone-card-item.selected {
+            border-color: var(--brand-red);
+            background: #fff0f3;
+        }
+
+        [data-theme="dark"] .zone-card-item.selected { background: #3a1c22; }
+
+        .zone-card-name { font-size: 0.88rem; font-weight: 800; color: var(--main-text); }
+        .zone-card-price { font-size: 0.85rem; font-weight: 900; color: var(--brand-red); background: #ffe4e8; padding: 3px 8px; border-radius: 8px; }
+
+        /* ================= شريط تثبيت التطبيق ================= */
+        .pwa-install-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--header-bg);
+            border-top: 2px solid var(--brand-red);
+            padding: 10px 16px;
+            display: none; 
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1500;
+        }
+
+        .pwa-info { display: flex; align-items: center; gap: 10px; }
+        .pwa-app-icon { width: 42px; height: 42px; border-radius: 10px; object-fit: cover; }
+        .pwa-text { display: flex; flex-direction: column; }
+        .pwa-app-title { font-size: 0.85rem; font-weight: 900; color: var(--main-text); }
+        .pwa-app-desc { font-size: 0.68rem; font-weight: 700; color: var(--desc-text); }
+        .pwa-actions { display: flex; align-items: center; gap: 8px; }
+        .pwa-install-btn { background: var(--brand-red); color: #ffffff; border: none; padding: 8px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 800; cursor: pointer; box-shadow: 0 3px 8px rgba(190, 18, 60, 0.3); }
+        .pwa-close-btn { background: transparent; border: none; color: var(--desc-text); font-size: 1.1rem; font-weight: 800; cursor: pointer; padding: 4px; }
+
+        /* ================= الفوتر ================= */
+        .restaurant-footer { position: relative; padding: 25px 15px; text-align: center; background: var(--header-bg); border-top: 1px solid var(--border-color); margin-top: 25px; padding-bottom: 35px; }
+        .footer-address-bar { font-size: 0.78rem; font-weight: 700; color: var(--main-text); display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 15px; padding: 10px; background: var(--input-bg); border-radius: 12px; border: 1px solid var(--border-color); }
+        .footer-address-label { color: var(--brand-red); font-weight: 800; }
+        .footer-phones a { display: inline-block; color: var(--desc-text); text-decoration: none; font-weight: 800; font-size: 0.95rem; margin: 4px 8px; }
+        .footer-rights { font-size: 0.68rem; color: var(--main-text); font-weight: 600; margin-bottom: 5px; }
+        .dev-credit { font-size: 0.72rem; color: var(--desc-text); font-weight: 700; }
+        .dev-credit a { color: var(--brand-red); text-decoration: none; display: block; margin-top: 3px; }
+
+        .admin-trigger { position: absolute; bottom: 10px; left: 10px; width: 30px; height: 30px; background: transparent; border: none; cursor: pointer; opacity: 0.25; z-index: 999; font-size: 1.1rem; }
+
+        /* ================= النوافذ والشات ================= */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: flex-end; backdrop-filter: blur(4px); }
+        .modal-content { background: var(--card-inner-bg); color: var(--main-text); width: 100%; max-width: 480px; padding: 18px 20px; border-radius: 24px 22px 0 0; max-height: 85vh; overflow-y: auto; box-shadow: 0 -8px 30px rgba(0,0,0,0.3); }
+
+        .cart-item-card { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 8px; }
+        .cart-item-img { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
+        .cart-item-info { flex: 1; }
+        .cart-item-name { font-weight: 800; font-size: 0.85rem; color: var(--main-text); } 
+        .cart-item-price { color: var(--brand-red); font-weight: 800; font-size: 0.8rem; display: block; }
+        .remove-btn { color: #ef4444; font-weight: 800; font-size: 0.75rem; cursor: pointer; padding: 4px; }
+        
+        .user-fields input, .user-fields textarea { 
+            background: var(--input-bg); 
+            border: 1px solid var(--border-color); 
+            padding: 11px 12px; 
+            border-radius: 10px; 
+            width: 100%; 
+            margin-bottom: 8px; 
+            color: var(--main-text); 
+            text-align: right; 
+            font-size: 0.82rem; 
+            font-weight: 700;
+            outline: none;
+        }
+
+        .order-type-container { margin-bottom: 12px; text-align: right; }
+        .order-type-title { font-size: 0.75rem; font-weight: 800; color: var(--desc-text); display: block; margin-bottom: 6px; }
+        .order-type-toggle { display: flex; gap: 10px; width: 100%; }
+        .type-btn { flex: 1; padding: 9px; border-radius: 10px; border: 1.5px solid var(--brand-red); background: var(--brand-red); color: #ffffff; font-weight: 800; font-size: 0.8rem; cursor: default; display: flex; align-items: center; justify-content: center; gap: 4px; }
+
+        .submit-btn { background: var(--brand-red); color: #ffffff; border: none; padding: 12px; border-radius: 12px; width: 100%; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 12px rgba(190, 18, 60, 0.3); }
+
+        .admin-modal-content {
+            background: var(--card-inner-bg);
+            padding: 20px;
+            border-radius: 20px;
+            width: 95%;
+            max-width: 550px;
+            margin: auto;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-nav-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .admin-tab-btn {
+            flex: 1;
+            padding: 8px 4px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--main-text);
+            font-size: 0.75rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .admin-tab-btn.active {
+            background: var(--brand-red);
+            color: #ffffff;
+            border-color: var(--brand-red);
+        }
+
+        .admin-tab-section {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            max-height: 60vh;
+            padding-left: 4px;
+        }
+
+        .admin-tab-section.active { display: flex; }
+
+        .global-control-box { display: flex; gap: 8px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+        .global-btn { flex: 1; padding: 10px; border-radius: 10px; border: none; font-weight: 800; font-size: 0.82rem; cursor: pointer; }
+        .global-btn.open { background: #2e7d32; color: #fff; }
+        .global-btn.close { background: #c62828; color: #fff; }
+
+        .work-hours-control-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: right;
+        }
+
+        .work-hours-control-box input {
+            padding: 9px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--main-text);
+            font-size: 0.8rem;
+            font-weight: 700;
+            outline: none;
+        }
+        
+        .admin-items-list { overflow-y: auto; max-height: 50vh; margin: 8px 0; padding-left: 5px; display: flex; flex-direction: column; gap: 8px; }
+        .admin-item-row { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border-color); }
+        .admin-item-name { font-size: 0.82rem; font-weight: 800; color: var(--main-text); text-align: right; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 10px; }
+        .admin-toggle-btn { padding: 6px 12px; border-radius: 8px; border: none; font-size: 0.75rem; font-weight: 800; cursor: pointer; white-space: nowrap; }
+        .admin-toggle-btn.btn-in-stock { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .admin-toggle-btn.btn-out-stock { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        .admin-btn { padding: 10px; margin: 5px 0; border: none; border-radius: 8px; width: 100%; font-weight: 800; cursor: pointer; font-size: 0.88rem; }
+        .admin-btn-open { background: #2e7d32; color: #fff; }
+        .admin-btn-cancel { background: #555; color: #fff; }
+
+        /* كروت لوحة المطبخ */
+        .live-order-card {
+            background: var(--input-bg);
+            border: 1.5px solid var(--border-color);
+            border-radius: 14px;
+            padding: 12px;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+        }
+        
+        .delete-order-x-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .delete-order-x-btn:active { transform: scale(0.85); }
+
+        .live-order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 6px;
+            padding-left: 28px;
+            font-weight: 800;
+            font-size: 0.85rem;
+        }
+
+        .live-order-status-badge {
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 800;
+        }
+
+        .status-prep { background: #fef08a; color: #854d0e; }
+        .status-delivering { background: #bfdbfe; color: #1e40af; }
+        .status-completed { background: #dcfce7; color: #166534; }
+        .status-canceled { background: #fee2e2; color: #991b1b; }
+
+        .live-order-items {
+            font-size: 0.78rem;
+            color: var(--main-text);
+            line-height: 1.4;
+            background: var(--card-inner-bg);
+            padding: 8px;
+            border-radius: 8px;
+            margin: 4px 0;
+        }
+
+        .live-order-actions { display: flex; gap: 4px; margin-top: 4px; }
+
+        .live-status-btn {
+            flex: 1;
+            padding: 5px;
+            border-radius: 6px;
+            border: none;
+            font-size: 0.68rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        /* نافذة الشات */
+        .chat-box-container {
+            display: flex;
+            flex-direction: column;
+            height: 320px;
+            background: var(--input-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            margin-top: 10px;
+        }
+
+        .chat-messages-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 6px;
+        }
+
+        .chat-msg-bubble {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .chat-msg-bubble.user {
+            background: var(--brand-red);
+            color: #ffffff;
+            align-self: flex-start;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-msg-bubble.admin {
+            background: #1f1f1f;
+            color: #ffffff;
+            align-self: flex-end;
+            border-bottom-left-radius: 2px;
+        }
+
+        .chat-input-row { display: flex; gap: 6px; margin-top: 6px; }
+
+        .chat-input-field {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-inner-bg);
+            color: var(--main-text);
+            font-size: 0.8rem;
+            outline: none;
+        }
+
+        .chat-send-btn {
+            background: var(--brand-red);
+            color: #ffffff;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- شاشة التحميل -->
+    <div id="splash-screen">
+        <div class="loader-content">
+            <div class="loader-logo-final"></div>
+            <p class="loader-slogan">#Mr_Hunger_Tasty 🍕</p>
+            <div class="loader-counter" id="loadCounter">0%</div>
+            <div class="loading-bar"><span id="loadProgress"></span></div>
+        </div>
+    </div>
+
+    <div class="sticky-wrapper">
+        <div id="storeStatusBanner" class="store-status-banner open">
+            <span id="statusIcon">🟢</span>
+            <span id="statusText">المطعم مفتوح ويستقبل الطلبات الآن</span>
+        </div>
+
+        <header>
+            <div class="header-right-actions">
+                <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="تغيير المظهر">
+                    <span id="themeIcon">☀️</span>
+                </button>
+            </div>
+
+            <div class="header-top">
+                <div class="header-logo-final"></div>
+            </div>
+
+            <div class="header-left-actions">
+                <button class="cart-trigger" onclick="toggleCart(true)" id="cartBtn">
+                    <span class="badge" id="cartBadge">0</span>
+                    <span>🛒</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="category-nav" id="catNav"></div>
+    </div>
+
+    <main id="menuList" class="menu-list"></main>
+
+    <!-- شريط تتبع حالة الطلب للزبون -->
+    <div class="user-order-tracker-bar" id="userOrderTrackerBar">
+        <div class="tracker-header">
+            <span>🛵 متابعة حالة أوردرك اللحظية:</span>
+            <span class="tracker-status-tag status-prep" id="userTrackerStatusTag">⏳ جاري التجهيز</span>
+        </div>
+        <div style="font-size: 0.72rem; color: var(--desc-text); text-align: right;" id="userTrackerDesc">
+            تم استلام طلبك في المطبخ وجاري التجهيز الآن بكل حب ✨
+        </div>
+        <button class="chat-btn-trigger" onclick="openUserChatModal()">
+            💬 شات مع المطعم
+        </button>
+    </div>
+
+    <!-- شريط تثبيت التطبيق -->
+    <div class="pwa-install-bar" id="pwaInstallBar">
+        <div class="pwa-info">
+            <img src="./images/logooo.png" class="pwa-app-icon" alt="App Icon">
+            <div class="pwa-text">
+                <span class="pwa-app-title">تطبيق MR. HUNGER</span>
+                <span class="pwa-app-desc">ثبّت التطبيق لطلب أسرع وتجربة أفضل!</span>
+            </div>
+        </div>
+        <div class="pwa-actions">
+            <button class="pwa-install-btn" id="pwaInstallBtn">تثبيت التطبيق 📲</button>
+            <button class="pwa-close-btn" onclick="dismissPwaBar()">✕</button>
+        </div>
+    </div>
+
+    <!-- الفوتر -->
+    <footer class="restaurant-footer">
+        <div class="footer-address-bar">
+            <span class="footer-address-label">📍 العنوان:</span>
+            <span class="footer-address-text">مطروح - أمام برج الفحل ومدرسة المغناوي بجانب نقابة التطبيقيين</span>
+        </div>
+
+        <div class="footer-phones">
+            <span style="font-weight: 800; font-size: 0.8rem; display: block; margin-bottom: 5px;">📞 أرقام الطلبات والواتساب:</span>
+            <a href="tel:01099009019">01099009019</a> | <a href="tel:01004614615">01004614615</a>
+        </div>
+        <p class="footer-rights">جميع الحقوق محفوظة لمطعم MR. HUNGER © 2026</p>
+        <div class="dev-credit">
+            Designed by eng / Ahmed Gaber shehata
+            <a href="tel:01030252806">📞 01030252806</a>
+        </div>
+
+        <button class="admin-trigger" onclick="openAdminModal()">⚙️</button>
+    </footer>
+
+    <!-- نافذة السلة وإتمام الطلب -->
+    <div class="modal" id="cartModal" onclick="if(event.target==this) toggleCart(false)">
+        <div class="modal-content">
+            <h3 id="modalTitle" style="margin-bottom: 12px; font-size: 1.05rem; font-weight: 800; color: var(--main-text);">تفاصيل طلبك 🛒</h3>
+            <div id="cartItemsList"></div>
+            
+            <div style="margin: 12px 0; padding: 12px 14px; background: var(--input-bg); border-radius: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem; border: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between; color: var(--main-text);">
+                    <span>مجموع الأصناف:</span>
+                    <b id="subtotalAmount" style="color: var(--main-text);">0 جنيه</b>
+                </div>
+                <div id="deliveryRow" style="display: flex; justify-content: space-between; color: var(--main-text);">
+                    <span>سعر التوصيل:</span>
+                    <b id="deliveryCostText" style="color: var(--brand-red);">0 جنيه</b>
+                </div>
+                <hr style="border: 0; border-top: 1px dashed var(--border-color); margin: 2px 0;">
+                <div style="display: flex; justify-content: space-between; color: var(--main-text);">
+                    <span>المجموع الكلي:</span>
+                    <b id="totalAmount" style="color: var(--brand-red); font-size: 1.1rem;">0 جنيه</b>
+                </div>
+            </div>
+
+            <div class="user-fields">
+                <div class="order-type-container">
+                    <span class="order-type-title">🛵 نوع الطلب:</span>
+                    <div class="order-type-toggle">
+                        <div class="type-btn">🛵 دليفري وتوصيل للمنازل</div>
+                    </div>
+                </div>
+
+                <div id="deliveryZoneWrapper">
+                    <button type="button" class="select-zone-trigger-btn" onclick="openZoneModal()">
+                        <span id="selectedZoneText">📍 اضغط لاختيار منطقة التوصيل</span>
+                        <span style="color: var(--brand-red); font-size: 0.8rem;">تغيير ➔</span>
+                    </button>
+                </div>
+
+                <input type="text" id="uName" placeholder="الاسم بالكامل">
+                <input type="tel" id="uPhone" placeholder="رقم الموبايل">
+                <input type="text" id="uAddr" placeholder="العنوان بالتفصيل (المنطقة / الشارع / الدور)">
+
+                <textarea id="uNotes" rows="2" placeholder="ملاحظات الطلب (مثال: بدون بصل، صوص زيادة)"></textarea>
+            </div>
+            <button class="submit-btn" id="submitOrderBtn" onclick="sendToWA()">تأكيد الطلب عبر واتساب ✨</button>
+        </div>
+    </div>
+
+    <!-- نافذة الشات للزبون والمطعم -->
+    <div class="modal" id="chatModal" style="z-index: 2800;" onclick="if(event.target==this) closeChatModal()">
+        <div class="modal-content" style="border-radius: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                <h3 style="font-size: 0.95rem; font-weight: 800;" id="chatTitle">💬 محادثة الأوردر</h3>
+                <span onclick="closeChatModal()" style="cursor: pointer; font-weight: 800; font-size: 1.1rem;">✕</span>
+            </div>
+            <div class="chat-box-container">
+                <div class="chat-messages-list" id="chatMessagesList"></div>
+                <div class="chat-input-row">
+                    <input type="text" id="chatInputField" class="chat-input-field" placeholder="اكتب رسالتك هنا..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+                    <button class="chat-send-btn" onclick="sendChatMessage()">إرسال</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة اختيار منطقة التوصيل -->
+    <div class="modal" id="zoneModal" style="z-index: 2500;" onclick="if(event.target==this) closeZoneModal()">
+        <div class="modal-content" style="border-radius: 24px 24px 0 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+                <h3 style="font-size: 1rem; font-weight: 800;">اختر منطقة التوصيل 🛵</h3>
+                <span onclick="closeZoneModal()" style="cursor: pointer; font-weight: 800; font-size: 1.1rem;">✕</span>
+            </div>
+
+            <div class="zone-modal-card-list" id="zoneListContainer"></div>
+        </div>
+    </div>
+
+    <!-- لوحة التحكم الاحترافية الشاملة -->
+    <div class="modal" id="adminModal" style="align-items: center;" onclick="if(event.target==this) closeAdminModal()">
+        <div class="admin-modal-content">
+            <div id="adminLoginStep">
+                <h3 style="margin-bottom: 10px; font-size: 1rem;">لوحة التحكم والإدارة ⚙️</h3>
+                <input type="password" id="adminPassInput" placeholder="أدخل الرقم السري" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid var(--border-color); text-align:center; font-weight:bold;">
+                <button class="admin-btn admin-btn-open" onclick="checkAdminPass()">دخول</button>
+                <button class="admin-btn admin-btn-cancel" onclick="closeAdminModal()">إلغاء</button>
+            </div>
+
+            <div id="adminControlStep" style="display: none;">
+                <div class="admin-nav-tabs">
+                    <button class="admin-tab-btn active" onclick="switchAdminTab('stockTab', this)">حالة المنيو ⚙️</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('kitchenTab', this)">شاشة المطبخ 👨‍🍳</button>
+                </div>
+
+                <!-- تبويب التحكم بالمنيو ومواعيد العمل -->
+                <div id="stockTab" class="admin-tab-section active">
+                    <div class="work-hours-control-box">
+                        <span style="font-size:0.75rem; font-weight:800; color:var(--main-text);">⏰ تعديل مواعيد العمل:</span>
+                        <input type="text" id="adminWorkHoursInput" placeholder="أدخل مواعيد العمل الجديدة">
+                        <button class="admin-btn admin-btn-open" style="padding:8px; margin:0;" onclick="saveWorkHours()">حفظ المواعيد الجديدة 💾</button>
+                    </div>
+
+                    <div class="global-control-box">
+                        <button class="global-btn open" onclick="setGlobalStoreStatus('open')">فتح الكل ✅</button>
+                        <button class="global-btn close" onclick="setGlobalStoreStatus('closed')">قفل الكل (نفدت الكمية) 🚫</button>
+                    </div>
+                    <p style="font-size: 0.72rem; color: var(--desc-text); margin-bottom: 6px;">التحكم في توفر كل صنف منفصلاً:</p>
+                    <div class="admin-items-list" id="adminItemsContainer"></div>
+                </div>
+
+                <!-- تبويب شاشة المطبخ والطلبات الحية -->
+                <div id="kitchenTab" class="admin-tab-section">
+                    <p style="font-size: 0.72rem; color: var(--desc-text); margin-bottom: 6px;">الطلبات الواردة لحظياً المباشرة:</p>
+                    <div id="liveOrdersContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                </div>
+
+                <button class="admin-btn admin-btn-cancel" onclick="closeAdminModal()" style="margin-top: 8px;">إغلاق اللوحة</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DELIVERY_ZONES = [
+            { name: "وسط البلد - مطروح", price: 15 },
+            { name: "شارع إسكندرية", price: 15 },
+            { name: "علم الروم", price: 20 },
+            { name: "الفيروز", price: 25 },
+            { name: "البوسيت", price: 20 },
+            { name: "الكورنيش", price: 20 },
+            { name: "القصر", price: 30 },
+            { name: "منطقة أخرى (يتحدد مع المطعم)", price: 0, custom: true }
+        ];
+
+        let selectedZone = null;
+
+        let deferredPrompt;
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker Registered!'))
+                    .catch(err => console.log('Service Worker Failed:', err));
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const pwaBar = document.getElementById('pwaInstallBar');
+            if (pwaBar) pwaBar.style.display = 'flex';
+        });
+
+        const installBtn = document.getElementById('pwaInstallBtn');
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') dismissPwaBar();
+                    deferredPrompt = null;
+                }
+            });
+        }
+
+        function dismissPwaBar() {
+            const pwaBar = document.getElementById('pwaInstallBar');
+            if (pwaBar) pwaBar.style.display = 'none';
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAyi3bQqd55atTlULXRTRm5HOuwJthlDaI",
+            authDomain: "mr-kofta-app.firebaseapp.com",
+            databaseURL: "https://mr-kofta-app-default-rtdb.firebaseio.com",
+            projectId: "mr-kofta-app",
+            storageBucket: "mr-kofta-app.appspot.com",
+            messagingSenderId: "626018942432",
+            appId: "1:626018942432:web:674e7fb614275554713f85"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const IMAGES_PATH = "./images/"; 
+        const SECRET_PIN = "100200";
+
+        let menuData = [], cart = [];
+        let itemSizeSelection = {}; 
+        let currentTotal = 0; 
+        let currentSubtotal = 0;
+        let currentDeliveryCost = 0;
+        let isGlobalStoreOpen = true; 
+        let itemsStockStatus = {}; 
+        let liveOrdersData = {};
+        let initialLoadDone = false;
+        let lastUserOrderStatus = null;
+        let activeChatOrderId = null;
+        let chatSenderRole = 'user'; 
+
+        function isWorkingHours() {
+            return true;
+        }
+
+        function cleanKey(name) { return name.replace(/[.#$\[\]]/g, "_"); }
+
+        db.ref('global_restaurant_status').on('value', (snapshot) => {
+            const status = snapshot.val() || 'open';
+            isGlobalStoreOpen = (status === 'open');
+            updateStoreUI();
+            refreshMenuDisplay();
+        });
+
+        db.ref('work_hours_text').on('value', (snapshot) => {
+            const hoursText = snapshot.val() || "مواعيد العمل: يومياً من 12:00 م لـ 2:00 ص";
+            const inputEl = document.getElementById('adminWorkHoursInput');
+            if (inputEl) inputEl.value = hoursText;
+        });
+
+        function saveWorkHours() {
+            const inputEl = document.getElementById('adminWorkHoursInput');
+            if (!inputEl) return;
+            const newText = inputEl.value.trim();
+            if (!newText) {
+                alert('برجاء أدخل مواعيد العمل أولاً!');
+                return;
+            }
+            db.ref('work_hours_text').set(newText)
+                .then(() => alert('تم تحديث مواعيد العمل بنجاح! ✅'))
+                .catch((err) => alert('حدث خطأ: ' + err.message));
+        }
+
+        db.ref('items_stock').on('value', (snapshot) => {
+            itemsStockStatus = snapshot.val() || {};
+            refreshMenuDisplay();
+            if (document.getElementById('adminControlStep').style.display === 'block') {
+                renderAdminItemsList();
+            }
+        });
+
+        db.ref('orders').on('value', (snapshot) => {
+            liveOrdersData = snapshot.val() || {};
+            if (initialLoadDone && document.getElementById('adminControlStep').style.display === 'block') {
+                playKitchenBellSound();
+            }
+            initialLoadDone = true;
+            renderLiveKitchenOrders();
+            checkAndRestoreUserOrder();
+        });
+
+        function playKitchenBellSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.6);
+            } catch(e){}
+        }
+
+        function playUserNotificationSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(880, ctx.currentTime); 
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.35);
+            } catch(e){}
+        }
+
+        function checkAndRestoreUserOrder() {
+            const activeOrderId = localStorage.getItem('mr_hunger_active_order_id');
+            if (!activeOrderId) return;
+
+            const order = liveOrdersData[activeOrderId];
+            const trackerBar = document.getElementById('userOrderTrackerBar');
+            const tag = document.getElementById('userTrackerStatusTag');
+            const desc = document.getElementById('userTrackerDesc');
+
+            if (!order) {
+                if(trackerBar) trackerBar.style.display = 'none';
+                return;
+            }
+
+            const currentStatus = order.status || 'prep';
+            if(trackerBar) trackerBar.style.display = 'flex';
+
+            if (lastUserOrderStatus && lastUserOrderStatus !== currentStatus) {
+                playUserNotificationSound();
+            }
+            lastUserOrderStatus = currentStatus;
+
+            if (currentStatus === 'prep') {
+                tag.className = 'tracker-status-tag status-prep';
+                tag.innerText = '⏳ جاري التجهيز';
+                desc.innerText = 'تم استلام طلبك في المطبخ وجاري التجهيز الآن بكل حب ✨';
+            } else if (currentStatus === 'delivering') {
+                tag.className = 'tracker-status-tag status-delivering';
+                tag.innerText = '🛵 خرج للتوصيل';
+                desc.innerText = 'طلبك خرج الآن مع الدليفري وفي طريقه إليك! 🎉';
+            } else if (currentStatus === 'completed') {
+                tag.className = 'tracker-status-tag status-completed';
+                tag.innerText = '✅ تم التسليم';
+                desc.innerText = 'نتمنى لك وجبة شهية! شكراً لطلبك من MR. HUNGER ✨';
+                setTimeout(() => {
+                    if(trackerBar) trackerBar.style.display = 'none';
+                    localStorage.removeItem('mr_hunger_active_order_id');
+                }, 10000);
+            } else if (currentStatus === 'canceled') {
+                tag.className = 'tracker-status-tag status-canceled';
+                tag.innerText = '❌ تم إلغاء الطلب';
+                desc.innerText = 'تم إلغاء الطلب. يرجى التواصل مع المطعم لأي استفسار.';
+                setTimeout(() => {
+                    if(trackerBar) trackerBar.style.display = 'none';
+                    localStorage.removeItem('mr_hunger_active_order_id');
+                }, 8000);
+            }
+        }
+
+        function refreshMenuDisplay() {
+            if (menuData.length > 0) {
+                const activeCatDOM = document.querySelector('.cat-item.active span');
+                if (activeCatDOM) filterCat(activeCatDOM.innerText);
+            }
+        }
+
+        function updateStoreUI() {
+            const banner = document.getElementById('storeStatusBanner');
+            const statusIcon = document.getElementById('statusIcon');
+            const statusText = document.getElementById('statusText');
+
+            const openHours = isWorkingHours();
+
+            if (!openHours) {
+                if(banner) banner.className = 'store-status-banner closed';
+                if(statusIcon) statusIcon.innerText = '🔴';
+                if(statusText) statusText.innerText = 'المطعم مغلق الآن خارج مواعيد العمل ⏰';
+            } else if (isGlobalStoreOpen) {
+                if(banner) banner.className = 'store-status-banner open';
+                if(statusIcon) statusIcon.innerText = '🟢';
+                if(statusText) statusText.innerText = 'المطعم مفتوح ويستقبل الطلبات الآن';
+            } else {
+                if(banner) banner.className = 'store-status-banner closed';
+                if(statusIcon) statusIcon.innerText = '🔴';
+                if(statusText) statusText.innerText = 'عذراً، نفدت الكمية لهذا اليوم 🚫';
+            }
+        }
+
+        function openAdminModal() {
+            document.getElementById('adminModal').style.display = 'flex';
+            document.getElementById('adminLoginStep').style.display = 'block';
+            document.getElementById('adminControlStep').style.display = 'none';
+            document.getElementById('adminPassInput').value = '';
+        }
+
+        function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
+
+        function checkAdminPass() {
+            const input = document.getElementById('adminPassInput').value;
+            if (input === SECRET_PIN) {
+                document.getElementById('adminLoginStep').style.display = 'none';
+                document.getElementById('adminControlStep').style.display = 'block';
+                renderAdminItemsList();
+                renderLiveKitchenOrders();
+            } else {
+                alert('الرقم السري غير صحيح!');
+            }
+        }
+
+        function switchAdminTab(tabId, btn) {
+            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.admin-tab-section').forEach(s => s.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function setGlobalStoreStatus(status) {
+            db.ref('global_restaurant_status').set(status)
+                .then(() => alert(status === 'open' ? 'تم فتح المطعم واستقبال الطلبات ✅' : 'تم إغلاق المطعم وتغيير كل الأصناف لنفدت الكمية 🚫'))
+                .catch((err) => alert('حدث خطأ: ' + err.message));
+        }
+
+        function renderAdminItemsList() {
+            const container = document.getElementById('adminItemsContainer');
+            if (!container) return;
+
+            container.innerHTML = menuData.map(item => {
+                const itemKey = cleanKey(item.name);
+                const isOutOfStock = (itemsStockStatus[itemKey] === 'out');
+                const btnText = isOutOfStock ? "نفدت الكمية 🚫" : "متاح ✅";
+                const btnClass = isOutOfStock ? "btn-out-stock" : "btn-in-stock";
+                
+                return `
+                <div class="admin-item-row">
+                    <span class="admin-item-name">${item.name}</span>
+                    <button class="admin-toggle-btn ${btnClass}" onclick="toggleItemStock('${item.name}')">
+                        ${btnText}
+                    </button>
+                </div>`;
+            }).join('');
+        }
+
+        function toggleItemStock(itemName) {
+            const itemKey = cleanKey(itemName);
+            const currentStatus = itemsStockStatus[itemKey] || 'in';
+            const newStatus = (currentStatus === 'out') ? 'in' : 'out';
+
+            db.ref(`items_stock/${itemKey}`).set(newStatus).catch((err) => alert('حدث خطأ أثناء الحفظ: ' + err.message));
+        }
+
+        function renderLiveKitchenOrders() {
+            const container = document.getElementById('liveOrdersContainer');
+            if (!container) return;
+
+            const orderKeys = Object.keys(liveOrdersData).reverse();
+            if (orderKeys.length === 0) {
+                container.innerHTML = `<p style="font-size: 0.8rem; color: var(--desc-text); text-align:center; padding:15px;">لا توجد طلبات واردة حتى الآن 📭</p>`;
+                return;
+            }
+
+            container.innerHTML = orderKeys.map(key => {
+                const ord = liveOrdersData[key];
+                const status = ord.status || 'prep';
+                
+                let badgeClass = 'status-prep', statusTxt = '⏳ جاري التجهيز';
+                if (status === 'delivering') { badgeClass = 'status-delivering'; statusTxt = '🛵 خرج للتوصيل'; }
+                else if (status === 'completed') { badgeClass = 'status-completed'; statusTxt = '✅ تم التسليم'; }
+                else if (status === 'canceled') { badgeClass = 'status-canceled'; statusTxt = '❌ ملغي'; }
+
+                const itemsStr = ord.items ? ord.items.map(i => `• ${i.name} (x${i.qty || 1})`).join('<br>') : '';
+                const chatCount = ord.chats ? Object.keys(ord.chats).length : 0;
+
+                return `
+                <div class="live-order-card">
+                    <button class="delete-order-x-btn" title="حذف الطلب نهائياً" onclick="deleteOrderFromKitchen('${key}')">✕</button>
+                    <div class="live-order-header">
+                        <span>👤 ${ord.userName || 'عميل'}</span>
+                        <span class="live-order-status-badge ${badgeClass}">${statusTxt}</span>
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--desc-text);">📞 ${ord.userPhone || ''} | 📍 ${ord.zone || ''}</div>
+                    <div class="live-order-items">${itemsStr}</div>
+                    <div style="font-size:0.78rem; font-weight:800; color:var(--brand-red); display:flex; justify-content:space-between; align-items:center;">
+                        <span>💰 الإجمالي: ${ord.totalAmount || 0} ج.م</span>
+                        <button class="chat-btn-trigger" style="margin:0;" onclick="openAdminChatModal('${key}', '${ord.userName}')">💬 الشات (${chatCount})</button>
+                    </div>
+                    <div class="live-order-actions">
+                        <button class="live-status-btn" style="background:#fef08a; color:#854d0e;" onclick="updateOrderStatus('${key}', 'prep')">تجهيز ⏳</button>
+                        <button class="live-status-btn" style="background:#bfdbfe; color:#1e40af;" onclick="updateOrderStatus('${key}', 'delivering')">توصيل 🛵</button>
+                        <button class="live-status-btn" style="background:#dcfce7; color:#166534;" onclick="updateOrderStatus('${key}', 'completed')">تم ✅</button>
+                        <button class="live-status-btn" style="background:#fee2e2; color:#991b1b;" onclick="updateOrderStatus('${key}', 'canceled')">إلغاء ❌</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function deleteOrderFromKitchen(orderId) {
+            if (confirm('هل أنت تأكد من حذف هذا الأوردر نهائياً من السجل؟')) {
+                db.ref(`orders/${orderId}`).remove();
+            }
+        }
+
+        function updateOrderStatus(orderId, newStatus) {
+            db.ref(`orders/${orderId}/status`).set(newStatus);
+        }
+
+        /* تعديل دالة فتح الشات للزبون لضمان العرض والدقة */
+        function openUserChatModal() {
+            const activeOrderId = localStorage.getItem('mr_hunger_active_order_id');
+            if (!activeOrderId) {
+                alert("لا يوجد أوردر نشط حالياً للمحادثة.");
+                return;
+            }
+            chatSenderRole = 'user';
+            activeChatOrderId = activeOrderId;
+            document.getElementById('chatTitle').innerText = "💬 شات مع المطعم (متابعة الأوردر)";
+            
+            const chatModal = document.getElementById('chatModal');
+            if (chatModal) {
+                chatModal.style.display = 'flex';
+            }
+            listenToChatMessages(activeOrderId);
+        }
+
+        function openAdminChatModal(orderId, userName) {
+            chatSenderRole = 'admin';
+            activeChatOrderId = orderId;
+            document.getElementById('chatTitle').innerText = `💬 محادثة مع: ${userName}`;
+            
+            const chatModal = document.getElementById('chatModal');
+            if (chatModal) {
+                chatModal.style.display = 'flex';
+            }
+            listenToChatMessages(orderId);
+        }
+
+        function closeChatModal() {
+            document.getElementById('chatModal').style.display = 'none';
+            if (activeChatOrderId) {
+                db.ref(`orders/${activeChatOrderId}/chats`).off();
+            }
+        }
+
+        function listenToChatMessages(orderId) {
+            const list = document.getElementById('chatMessagesList');
+            db.ref(`orders/${orderId}/chats`).on('value', (snapshot) => {
+                const chats = snapshot.val() || {};
+                list.innerHTML = Object.values(chats).map(msg => {
+                    const isUser = msg.sender === 'user';
+                    const roleClass = isUser ? 'user' : 'admin';
+                    const label = isUser ? 'أنت' : 'المطعم';
+                    return `<div class="chat-msg-bubble ${roleClass}"><b>${label}:</b> ${msg.text}</div>`;
+                }).join('');
+                list.scrollTop = list.scrollHeight;
+            });
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInputField');
+            const text = input.value.trim();
+            if (!text || !activeChatOrderId) return;
+
+            db.ref(`orders/${activeChatOrderId}/chats`).push({
+                sender: chatSenderRole,
+                text: text,
+                timestamp: Date.now()
+            });
+
+            input.value = '';
+        }
+
+        function handleThemeToggle() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme_preference', newTheme);
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.innerText = newTheme === 'dark' ? '🌙' : '☀️';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme_preference') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.innerText = savedTheme === 'dark' ? '🌙' : '☀️';
+
+            const themeBtn = document.getElementById('themeToggleBtn');
+            if (themeBtn) themeBtn.addEventListener('click', handleThemeToggle);
+
+            loadMenu();
+            renderZoneList();
+
+            setInterval(() => {
+                updateStoreUI();
+                refreshMenuDisplay();
+            }, 60000);
+        });
+
+        function renderZoneList() {
+            const container = document.getElementById('zoneListContainer');
+            if (!container) return;
+
+            container.innerHTML = DELIVERY_ZONES.map((zone, idx) => `
+                <div class="zone-card-item ${selectedZone && selectedZone.name === zone.name ? 'selected' : ''}" onclick="selectZone(${idx})">
+                    <span class="zone-card-name">📍 ${zone.name}</span>
+                    <span class="zone-card-price">${zone.custom ? 'يتحدد مع المطعم' : zone.price + ' ج.م'}</span>
+                </div>
+            `).join('');
+        }
+
+        function openZoneModal() { document.getElementById('zoneModal').style.display = 'flex'; }
+        function closeZoneModal() { document.getElementById('zoneModal').style.display = 'none'; }
+
+        function selectZone(idx) {
+            selectedZone = DELIVERY_ZONES[idx];
+            const btnText = document.getElementById('selectedZoneText');
+            if (btnText) {
+                btnText.innerText = selectedZone.custom 
+                    ? `📍 ${selectedZone.name}`
+                    : `📍 ${selectedZone.name} (${selectedZone.price} ج.م)`;
+            }
+            renderZoneList();
+            closeZoneModal();
+            updateCart();
+        }
+
+        function preloadAllImages(urls, onProgress, onComplete) {
+            if (urls.length === 0) { onComplete(); return; }
+            let loadedCount = 0;
+            urls.forEach(url => {
+                const img = new Image();
+                img.src = url;
+                img.onload = img.onerror = () => {
+                    loadedCount++;
+                    onProgress(loadedCount, urls.length);
+                    if (loadedCount === urls.length) onComplete();
+                };
+            });
+        }
+
+        /* ================= بيانات بيتزا مستر هنجر ================= */
+        const hungerMenu = [
+            // قسم الأجبان والمارجريتا
+            { id: 1, category: "أجبان ومارجريتا", name: "بيتزا مرجريتا", prices: { S: 85.00, M: 135.00, L: 185.00 }, desc: "Pizza Margarita" },
+            { id: 2, category: "أجبان ومارجريتا", name: "بيتزا مشكل جبن", prices: { S: 104.99, M: 155.00, L: 205.00 }, desc: "Mixed Cheese Pizza" },
+            
+            // قسم اللحوم والسجق
+            { id: 3, category: "لحوم وسجق", name: "بيتزا ميكس لحوم", prices: { S: 115.00, M: 165.00, L: 215.00 }, desc: "Mix Meat Pizza" },
+            { id: 4, category: "لحوم وسجق", name: "بيتزا مفروم", prices: { S: 105.00, M: 155.00, L: 205.00 }, desc: "Minced Meat Pizza" },
+            { id: 5, category: "لحوم وسجق", name: "بيتزا سوسيس", prices: { S: 105.00, M: 155.00, L: 205.00 }, desc: "Sosis Pizza" },
+            { id: 6, category: "لحوم وسجق", name: "بيتزا سجق", prices: { S: 105.00, M: 155.00, L: 205.00 }, desc: "Oriental Sausage Pizza" },
+            { id: 7, category: "لحوم وسجق", name: "بيتزا بسطرمة", prices: { S: 105.00, M: 155.00, L: 205.00 }, desc: "Bastrma Pizza" },
+            { id: 8, category: "لحوم وسجق", name: "بيتزا جبن بسطرمة", prices: { S: 115.00, M: 165.00, L: 215.00 }, desc: "Cheese Bastrma Pizza" },
+            { id: 9, category: "لحوم وسجق", name: "بيتزا بيف بيكن", prices: { S: 170.00, M: 200.00, L: 250.00 }, desc: "Beef Bacon Pizza" },
+            { id: 10, category: "لحوم وسجق", name: "بيتزا ببرونى", prices: { S: 170.00, M: 200.00, L: 250.00 }, desc: "Pepperoni Pizza" },
+            { id: 11, category: "لحوم وسجق", name: "بيتزا سلامى", prices: { S: 170.00, M: 200.00, L: 250.00 }, desc: "Salami Pizza" },
+
+            // قسم الفراخ والرانش
+            { id: 12, category: "فراخ ورانش", name: "بيتزا فراخ", prices: { S: 105.00, M: 155.00, L: 205.00 }, desc: "Chicken Pizza" },
+            { id: 13, category: "فراخ ورانش", name: "بيتزا تشكن رانش", prices: { S: 115.00, M: 165.00, L: 215.00 }, desc: "Chicken Ranch Pizza" },
+            { id: 14, category: "فراخ ورانش", name: "بيتزا باربيكيو", prices: { S: 115.00, M: 165.00, L: 215.00 }, desc: "BBQ Chicken Pizza" },
+            { id: 15, category: "فراخ ورانش", name: "بيتزا بوب كورن تشكن", prices: { S: 115.00, M: 165.00, L: 215.00 }, desc: "Chicken Popcorn Pizza" },
+            { id: 16, category: "فراخ ورانش", name: "بيتزا مستر هنجر", prices: { S: 115.00, M: 165.00, L: 215.00 }, desc: "Mr.Hunger Special Pizza" },
+
+            // قسم السي فود والتونة
+            { id: 17, category: "سي فود وتونة", name: "بيتزا تونة", prices: { S: 115.00, M: 170.00, L: 220.00 }, desc: "Tuna Pizza" },
+            { id: 18, category: "سي فود وتونة", name: "بيتزا جمبرى", prices: { S: 175.00, M: 275.00, L: 355.00 }, desc: "Shrimp Pizza" },
+            { id: 19, category: "سي فود وتونة", name: "بيتزا سى فود", prices: { S: 175.00, M: 275.00, L: 355.00 }, desc: "Seafood Pizza" },
+            { id: 20, category: "سي فود وتونة", name: "بيتزا سى فود رانش", prices: { S: 185.00, M: 285.00, L: 375.00 }, desc: "Seafood Ranch Pizza" }
+        ];
+
+        async function loadMenu() {
+            const counterEl = document.getElementById('loadCounter');
+            const progressEl = document.getElementById('loadProgress');
+            
+            menuData = hungerMenu;
+            renderNav();
+
+            const categories = [...new Set(menuData.map(item => item.category))];
+            const catImages = categories.map(cat => `${IMAGES_PATH}${cat}.jpg`);
+            const itemImages = menuData.map(item => `${IMAGES_PATH}${item.name}.jpg`);
+            const allImagesToPreload = [...new Set([...catImages, ...itemImages])];
+
+            preloadAllImages(allImagesToPreload, (loaded, total) => {
+                const percent = Math.floor((loaded / total) * 100);
+                if(counterEl) counterEl.innerText = `${percent}%`;
+                if(progressEl) progressEl.style.width = `${percent}%`;
+            }, () => {
+                if(counterEl) counterEl.innerText = `100%`;
+                if(progressEl) progressEl.style.width = `100%`;
+                setTimeout(() => {
+                    const splash = document.getElementById('splash-screen');
+                    if(splash) splash.classList.add('splash-hidden');
+                }, 400);
+            });
+        }
+
+        function renderNav() {
+            const categories = [...new Set(menuData.map(item => item.category))];
+            let currentActiveCat = categories[0];
+
+            document.getElementById('catNav').innerHTML = categories.map((catName, index) => `
+                <div class="cat-item ${index === 0 ? 'active' : ''}" onclick="filterCat('${catName}', this)">
+                    <div class="cat-img-box">
+                        <img src="${IMAGES_PATH}${catName}.jpg" onerror="this.onerror=null; this.src='${IMAGES_PATH}default.jpg';">
+                    </div>
+                    <span>${catName}</span>
+                </div>
+            `).join('');
+            filterCat(currentActiveCat);
+        }
+
+        function setPizzaSize(itemId, size) {
+            itemSizeSelection[itemId] = size;
+            const item = menuData.find(i => i.id === itemId);
+            if (!item) return;
+
+            const selectedPrice = item.prices[size];
+            const priceNumEl = document.getElementById(`price-num-${itemId}`);
+            const actionBtn = document.getElementById(`btn-${itemId}`);
+
+            if (priceNumEl) priceNumEl.innerText = selectedPrice;
+            if (actionBtn) {
+                actionBtn.setAttribute('data-price', selectedPrice);
+                actionBtn.setAttribute('data-size', `حجم ${size}`);
+            }
+
+            const card = document.getElementById(`card-${itemId}`);
+            if (card) {
+                card.querySelectorAll('.simple-pill-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.getAttribute('data-size') === size);
+                });
+            }
+        }
+
+        function filterCat(cat, el) {
+            if(el) { document.querySelectorAll('.cat-item').forEach(b => b.classList.remove('active')); el.classList.add('active'); }
+            const filtered = menuData.filter(i => i.category === cat);
+            const openNow = isWorkingHours();
+
+            document.getElementById('menuList').innerHTML = filtered.map(item => {
+                let ingredientsElement = item.desc ? `<span class="food-ingredients">${item.desc.trim()}</span>` : "";
+
+                if (!itemSizeSelection[item.id]) {
+                    itemSizeSelection[item.id] = 'S';
+                }
+                const currentSize = itemSizeSelection[item.id];
+                const currentPrice = item.prices[currentSize];
+
+                const customOptionsHtml = `
+                <div class="custom-options-container">
+                    <span class="option-title">الحجم:</span>
+                    <div class="simple-option-pills">
+                        <button type="button" class="simple-pill-btn ${currentSize === 'S' ? 'active' : ''}" data-size="S" onclick="setPizzaSize(${item.id}, 'S')">S</button>
+                        <button type="button" class="simple-pill-btn ${currentSize === 'M' ? 'active' : ''}" data-size="M" onclick="setPizzaSize(${item.id}, 'M')">M</button>
+                        <button type="button" class="simple-pill-btn ${currentSize === 'L' ? 'active' : ''}" data-size="L" onclick="setPizzaSize(${item.id}, 'L')">L</button>
+                    </div>
+                </div>`;
+
+                const itemKey = cleanKey(item.name);
+                const isItemOutOfStock = (itemsStockStatus[itemKey] === 'out');
+
+                let btnLabel = "اطلب الان";
+                let isDisabled = false;
+
+                if (!openNow) {
+                    btnLabel = "مغلق الآن 🔒";
+                    isDisabled = true;
+                } else if (!isGlobalStoreOpen) {
+                    btnLabel = "نفدت الكمية 🚫";
+                    isDisabled = true;
+                } else if (isItemOutOfStock) {
+                    btnLabel = "غير متاح 🚫";
+                    isDisabled = true;
+                }
+
+                const btnClass = isDisabled ? "add-btn out-of-stock-mode" : "add-btn";
+                const disabledAttr = isDisabled ? "disabled" : "";
+
+                return `
+                <div class="food-card" id="card-${item.id}">
+                    <div class="card-top-content">
+                        <div class="card-image-wrapper">
+                            <img class="item-img" src="${IMAGES_PATH}${item.name}.jpg" onerror="this.onerror=null; this.src='${IMAGES_PATH}default.jpg';">
+                        </div>
+                        <div class="card-details-wrapper">
+                            <span class="food-name" title="${item.name}">${item.name}</span>
+                            ${ingredientsElement}
+                            ${customOptionsHtml}
+                        </div>
+                    </div>
+                    <div class="card-bottom-content">
+                        <div class="btn-wrapper">
+                            <button class="${btnClass}" ${disabledAttr} id="btn-${item.id}" data-category="${cat}" data-price="${currentPrice}" data-size="حجم ${currentSize}" onclick="triggerAddToCart(event, this, '${item.name.replace(/'/g, "\\'")}')">
+                                ${btnLabel}
+                            </button>
+                        </div>
+                        <div class="price-container-leftish">
+                            <span class="food-price">
+                                <span class="price-num" id="price-num-${item.id}">${currentPrice}</span>
+                                <span class="price-txt">ج.م</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function triggerAddToCart(e, btn, name) {
+            const itemKey = cleanKey(name);
+            if (!isWorkingHours() || !isGlobalStoreOpen || itemsStockStatus[itemKey] === 'out') return;
+
+            const category = btn.getAttribute('data-category') || "";
+            const price = btn.getAttribute('data-price') || "0"; 
+            const size = btn.getAttribute('data-size');
+
+            let displayName = name + (size ? ` (${size})` : '');
+
+            cart.push({ name: displayName, category: category, price: price, img: `${IMAGES_PATH}${name}.jpg` }); 
+            
+            btn.classList.add('success-state'); 
+            btn.innerText = "تم الاضافه للسله ✔️";
+            
+            setTimeout(() => { 
+                btn.classList.remove('success-state'); 
+                btn.innerText = "اطلب الان"; 
+            }, 1500);
+
+            updateCart();
+        }
+
+        function updateCart() {
+            const badge = document.getElementById('cartBadge'); if(badge) { badge.innerText = cart.length; badge.classList.toggle('show', cart.length > 0); }
+            let subtotal = 0; const container = document.getElementById('cartItemsList');
+            container.innerHTML = cart.map((item, idx) => {
+                subtotal += parseFloat(item.price) || 0;
+                return `<div class="cart-item-card"><img src="${item.img}" class="cart-item-img" onerror="this.onerror=null; this.src='${IMAGES_PATH}default.jpg';"><div class="cart-item-info"><span class="cart-item-name">${item.name}</span><span class="cart-item-price">${item.price} ج.م</span></div><span class="remove-btn" onclick="removeFromCart(${idx})">حذف</span></div>`;
+            }).join('');
+            
+            currentSubtotal = subtotal;
+
+            if (selectedZone) {
+                currentDeliveryCost = selectedZone.price;
+            } else {
+                currentDeliveryCost = 0;
+            }
+
+            currentTotal = currentSubtotal + currentDeliveryCost;
+
+            document.getElementById('subtotalAmount').innerText = `${currentSubtotal} ج.م`;
+            
+            const deliveryTextEl = document.getElementById('deliveryCostText');
+            if (selectedZone && selectedZone.custom) {
+                deliveryTextEl.innerText = "يتحدد مع المطعم";
+            } else {
+                deliveryTextEl.innerText = `${currentDeliveryCost} ج.م`;
+            }
+
+            document.getElementById('totalAmount').innerText = `${currentTotal} ج.م`;
+        }
+
+        function removeFromCart(idx) { cart.splice(idx, 1); updateCart(); if(cart.length === 0) toggleCart(false); }
+        function toggleCart(s) { const modal = document.getElementById('cartModal'); if(!modal) return; if (s) { modal.style.display = 'flex'; history.pushState({ cartOpen: true }, ""); } else { modal.style.display = 'none'; } }
+
+        function sendToWA() {
+            const n = document.getElementById('uName').value.trim();
+            const p = document.getElementById('uPhone').value.trim();
+            const a = document.getElementById('uAddr').value.trim();
+            const notes = document.getElementById('uNotes') ? document.getElementById('uNotes').value.trim() : "";
+
+            if(!n || !p || cart.length === 0) { alert("برجاء إدخال اسمك ورقم تليفونك أولاً لتأكيد طلبك."); return; }
+            if (!selectedZone) { alert("برجاء اضغط لاختيار منطقة التوصيل أولاً."); return; }
+            if (!a) { alert("برجاء كتابة عنوانك بالتفصيل."); return; }
+
+            const summaryArr = [];
+            const summary = {}; 
+            cart.forEach(item => { summary[item.name] = (summary[item.name] || 0) + 1; });
+            for (const [itemKey, qty] of Object.entries(summary)) {
+                summaryArr.push({ name: itemKey, qty: qty });
+            }
+
+            const newOrderRef = db.ref('orders').push();
+            const orderId = newOrderRef.key;
+
+            newOrderRef.set({
+                userName: n,
+                userPhone: p,
+                userAddr: a,
+                zone: selectedZone.name,
+                deliveryFee: currentDeliveryCost,
+                subtotal: currentSubtotal,
+                totalAmount: currentTotal,
+                notes: notes,
+                items: summaryArr,
+                status: 'prep',
+                timestamp: Date.now()
+            });
+
+            // حفظ المعرف فوراً وتظهير شريط التتبع للعميل
+            localStorage.setItem('mr_hunger_active_order_id', orderId);
+            checkAndRestoreUserOrder();
+
+            let msg = `*طلب جديد - MR. HUNGER ✨*\n──────────────\n`;
+            msg += `👤 *الاسم:* ${n}\n📱 *الموبايل:* ${p}\n🛵 *نوع الطلب:* دليفري\n`;
+            msg += `📍 *المنطقة:* ${selectedZone.name}\n📍 *العنوان:* ${a}\n`;
+            
+            msg += `──────────────\n📦 *الطلبات:*\n`;
+            summaryArr.forEach(i => { msg += `• ${i.name} × ${i.qty}\n`; });
+            
+            if(notes) msg += `──────────────\n📝 *ملاحظات:* ${notes}\n`;
+
+            msg += `──────────────\n💵 *المجموع:* ${currentSubtotal} جنيه\n`;
+            if (selectedZone.custom) {
+                msg += `🛵 *التوصيل:* يتحدد بواسطة المطعم\n`;
+            } else {
+                msg += `🛵 *التوصيل:* ${currentDeliveryCost} جنيه\n`;
+            }
+            msg += `💰 *الإجمالي:* ${currentTotal} جنيه\n_MR. HUNGER ✨_`;
+            
+            toggleCart(false);
+            window.open(`https://wa.me/201099009019?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        window.addEventListener('popstate', (e) => {
+            const modal = document.getElementById('cartModal');
+            if (modal && modal.style.display === 'flex') {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
