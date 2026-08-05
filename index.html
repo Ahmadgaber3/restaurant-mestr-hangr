@@ -961,6 +961,8 @@
     </div>
 
     <script>
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTwPjfXhrOLI7BWKLR9gEJ6_Zw-DEGO8zRmWNIrd6mdmvacLLz7GlArdcTsyWv7D_0nEzhEGy2ffPqy/pub?output=csv";
+
         const DELIVERY_ZONES = [
             { name: "وسط البلد - مطروح", price: 15 },
             { name: "شارع إسكندرية", price: 15 },
@@ -1311,7 +1313,6 @@
             db.ref(`orders/${orderId}/status`).set(newStatus);
         }
 
-        /* تعديل دالة فتح الشات للزبون لضمان العرض والدقة */
         function openUserChatModal() {
             const activeOrderId = localStorage.getItem('mr_hunger_active_order_id');
             if (!activeOrderId) {
@@ -1394,14 +1395,170 @@
             const themeBtn = document.getElementById('themeToggleBtn');
             if (themeBtn) themeBtn.addEventListener('click', handleThemeToggle);
 
-            loadMenu();
+            loadMenuFromSheet();
             renderZoneList();
+
+            // فحص وتحديث المنيو تلقائياً من الشيت كل 30 ثانية
+            setInterval(() => {
+                loadMenuFromSheet(true);
+            }, 30000);
 
             setInterval(() => {
                 updateStoreUI();
                 refreshMenuDisplay();
             }, 60000);
         });
+
+        /* ================= دالة تفكيك واستخراج بيانات الـ CSV ================= */
+        function parseCSV(text) {
+            let lines = [];
+            let row = [];
+            let inQuotes = false;
+            let currentStr = '';
+
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                let nextChar = text[i+1];
+
+                if (char === '"') {
+                    if (inQuotes && nextChar === '"') {
+                        currentStr += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    row.push(currentStr.trim());
+                    currentStr = '';
+                } else if ((char === '\r' || char === '\n') && !inQuotes) {
+                    if (char === '\r' && nextChar === '\n') { i++; }
+                    row.push(currentStr.trim());
+                    if (row.length > 0 && row.some(cell => cell.length > 0)) {
+                        lines.push(row);
+                    }
+                    row = [];
+                    currentStr = '';
+                } else {
+                    currentStr += char;
+                }
+            }
+            if (currentStr.length > 0 || row.length > 0) {
+                row.push(currentStr.trim());
+                lines.push(row);
+            }
+            return lines;
+        }
+
+        /* ================= دالة تحميل وقراءة بيانات Google Sheets ================= */
+        async function loadMenuFromSheet(isBackgroundSync = false) {
+            const counterEl = document.getElementById('loadCounter');
+            const progressEl = document.getElementById('loadProgress');
+
+            try {
+                const response = await fetch(SHEET_CSV_URL + '&t=' + Date.now());
+                const csvData = await response.text();
+                const parsedRows = parseCSV(csvData);
+
+                if (parsedRows.length < 2) return;
+
+                const headers = parsedRows[0].map(h => h.toLowerCase());
+
+                const catIdx = headers.findIndex(h => h.includes('قسم') || h.includes('category') || h.includes('القسم'));
+                const nameIdx = headers.findIndex(h => h.includes('اسم') || h.includes('صنف') || h.includes('item') || h.includes('الاسم') || h.includes('الصنف'));
+                const descIdx = headers.findIndex(h => h.includes('وصف') || h.includes('desc') || h.includes('انجليزي') || h.includes('المكونات'));
+
+                const priceSIdx = headers.findIndex(h => h.includes('سعر') || h.includes('price') || h.includes('صغير') || h.includes('s'));
+                const priceMIdx = headers.findIndex(h => h.includes('وسط') || h.includes('m'));
+                const priceLIdx = headers.findIndex(h => h.includes('كبير') || h.includes('l'));
+
+                let parsedMenu = [];
+
+                for (let i = 1; i < parsedRows.length; i++) {
+                    const row = parsedRows[i];
+                    if (!row || row.length === 0) continue;
+
+                    let catName = (catIdx !== -1 && row[catIdx]) ? row[catIdx] : "عام";
+                    let itemName = (nameIdx !== -1 && row[nameIdx]) ? row[nameIdx] : "";
+                    let itemDesc = (descIdx !== -1 && row[descIdx]) ? row[descIdx] : "";
+
+                    if (!itemName) continue;
+
+                    let pS = parseFloat((priceSIdx !== -1 && row[priceSIdx]) ? row[priceSIdx] : 0) || 0;
+                    let pM = parseFloat((priceMIdx !== -1 && row[priceMIdx]) ? row[priceMIdx] : 0) || pS;
+                    let pL = parseFloat((priceLIdx !== -1 && row[priceLIdx]) ? row[priceLIdx] : 0) || pM;
+
+                    parsedMenu.push({
+                        id: i,
+                        category: catName,
+                        name: itemName,
+                        desc: itemDesc,
+                        prices: { S: pS, M: pM, L: pL }
+                    });
+                }
+
+                if (parsedMenu.length > 0) {
+                    menuData = parsedMenu;
+                    
+                    const activeCatDOM = document.querySelector('.cat-item.active span');
+                    const activeCatName = activeCatDOM ? activeCatDOM.innerText : null;
+
+                    renderNav();
+
+                    if (activeCatName) {
+                        const allCatItems = document.querySelectorAll('.cat-item');
+                        allCatItems.forEach(item => {
+                            if (item.querySelector('span').innerText === activeCatName) {
+                                filterCat(activeCatName, item);
+                            }
+                        });
+                    }
+                }
+
+                if (!isBackgroundSync) {
+                    const categories = [...new Set(menuData.map(item => item.category))];
+                    const catImages = categories.map(cat => `${IMAGES_PATH}${cat}.jpg`);
+                    const itemImages = menuData.map(item => `${IMAGES_PATH}${item.name}.jpg`);
+                    const allImagesToPreload = [...new Set([...catImages, ...itemImages])];
+
+                    preloadAllImages(allImagesToPreload, (loaded, total) => {
+                        const percent = Math.floor((loaded / total) * 100);
+                        if(counterEl) counterEl.innerText = `${percent}%`;
+                        if(progressEl) progressEl.style.width = `${percent}%`;
+                    }, () => {
+                        if(counterEl) counterEl.innerText = `100%`;
+                        if(progressEl) progressEl.style.width = `100%`;
+                        setTimeout(() => {
+                            const splash = document.getElementById('splash-screen');
+                            if(splash) splash.classList.add('splash-hidden');
+                        }, 400);
+                    });
+                }
+
+            } catch (error) {
+                console.error("خطأ أثناء تحميل المنيو من Google Sheet:", error);
+                if (!isBackgroundSync) {
+                    const splash = document.getElementById('splash-screen');
+                    if(splash) splash.classList.add('splash-hidden');
+                }
+            }
+        }
+
+        function renderNav() {
+            const categories = [...new Set(menuData.map(item => item.category))];
+            if (categories.length === 0) return;
+            
+            let currentActiveCat = categories[0];
+
+            document.getElementById('catNav').innerHTML = categories.map((catName, index) => `
+                <div class="cat-item ${index === 0 ? 'active' : ''}" onclick="filterCat('${catName.replace(/'/g, "\\'")}', this)">
+                    <div class="cat-img-box">
+                        <img src="${IMAGES_PATH}${catName}.jpg" onerror="this.onerror=null; this.src='${IMAGES_PATH}default.jpg';">
+                    </div>
+                    <span>${catName}</span>
+                </div>
+            `).join('');
+            filterCat(currentActiveCat);
+        }
 
         function renderZoneList() {
             const container = document.getElementById('zoneListContainer');
@@ -1443,78 +1600,6 @@
                     if (loadedCount === urls.length) onComplete();
                 };
             });
-        }
-
-        /* ================= بيانات بيتزا مستر هنجر ================= */
-        const hungerMenu = [
-            // قسم الأجبان والمارجريتا
-            { id: 1, category: "أجبان ومارجريتا", name: "بيتزا مرجريتا", prices: { S: 85.00, M: 135.00, L: 185.00 }, desc: "Pizza Margarita" },
-            { id: 2, category: "أجبان ومارجريتا", name: "بيتزا مشكل جبن", prices: { S: 104.99, M: 155.00, L: 205.00 }, desc: "Mixed Cheese Pizza" },
-            
-            // قسم اللحوم والسجق
-            { id: 3, category: "لحوم وسجق", name: "بيتزا ميكس لحوم", prices: { S: 115.00, M: 165.00, L: 215.00 }, desc: "Mix Meat Pizza" },
-            { id: 4, category: "لحوم وسجق", name: "بيتزا مفروم", prices: { S: 105.00, M: 155.00, L: 205.00 }, desc: "Minced Meat Pizza" },
-            { id: 5, category: "لحوم وسجق", name: "بيتزا سوسيس", prices: { S: 105.00, M: 155.00, L: 205.00 }, desc: "Sosis Pizza" },
-            { id: 6, category: "لحوم وسجق", name: "بيتزا سجق", prices: { S: 105.00, M: 155.00, L: 205.00 }, desc: "Oriental Sausage Pizza" },
-            { id: 7, category: "لحوم وسجق", name: "بيتزا بسطرمة", prices: { S: 105.00, M: 155.00, L: 205.00 }, desc: "Bastrma Pizza" },
-            { id: 8, category: "لحوم وسجق", name: "بيتزا جبن بسطرمة", prices: { S: 115.00, M: 165.00, L: 215.00 }, desc: "Cheese Bastrma Pizza" },
-            { id: 9, category: "لحوم وسجق", name: "بيتزا بيف بيكن", prices: { S: 170.00, M: 200.00, L: 250.00 }, desc: "Beef Bacon Pizza" },
-            { id: 10, category: "لحوم وسجق", name: "بيتزا ببرونى", prices: { S: 170.00, M: 200.00, L: 250.00 }, desc: "Pepperoni Pizza" },
-            { id: 11, category: "لحوم وسجق", name: "بيتزا سلامى", prices: { S: 170.00, M: 200.00, L: 250.00 }, desc: "Salami Pizza" },
-
-            // قسم الفراخ والرانش
-            { id: 12, category: "فراخ ورانش", name: "بيتزا فراخ", prices: { S: 105.00, M: 155.00, L: 205.00 }, desc: "Chicken Pizza" },
-            { id: 13, category: "فراخ ورانش", name: "بيتزا تشكن رانش", prices: { S: 115.00, M: 165.00, L: 215.00 }, desc: "Chicken Ranch Pizza" },
-            { id: 14, category: "فراخ ورانش", name: "بيتزا باربيكيو", prices: { S: 115.00, M: 165.00, L: 215.00 }, desc: "BBQ Chicken Pizza" },
-            { id: 15, category: "فراخ ورانش", name: "بيتزا بوب كورن تشكن", prices: { S: 115.00, M: 165.00, L: 215.00 }, desc: "Chicken Popcorn Pizza" },
-            { id: 16, category: "فراخ ورانش", name: "بيتزا مستر هنجر", prices: { S: 115.00, M: 165.00, L: 215.00 }, desc: "Mr.Hunger Special Pizza" },
-
-            // قسم السي فود والتونة
-            { id: 17, category: "سي فود وتونة", name: "بيتزا تونة", prices: { S: 115.00, M: 170.00, L: 220.00 }, desc: "Tuna Pizza" },
-            { id: 18, category: "سي فود وتونة", name: "بيتزا جمبرى", prices: { S: 175.00, M: 275.00, L: 355.00 }, desc: "Shrimp Pizza" },
-            { id: 19, category: "سي فود وتونة", name: "بيتزا سى فود", prices: { S: 175.00, M: 275.00, L: 355.00 }, desc: "Seafood Pizza" },
-            { id: 20, category: "سي فود وتونة", name: "بيتزا سى فود رانش", prices: { S: 185.00, M: 285.00, L: 375.00 }, desc: "Seafood Ranch Pizza" }
-        ];
-
-        async function loadMenu() {
-            const counterEl = document.getElementById('loadCounter');
-            const progressEl = document.getElementById('loadProgress');
-            
-            menuData = hungerMenu;
-            renderNav();
-
-            const categories = [...new Set(menuData.map(item => item.category))];
-            const catImages = categories.map(cat => `${IMAGES_PATH}${cat}.jpg`);
-            const itemImages = menuData.map(item => `${IMAGES_PATH}${item.name}.jpg`);
-            const allImagesToPreload = [...new Set([...catImages, ...itemImages])];
-
-            preloadAllImages(allImagesToPreload, (loaded, total) => {
-                const percent = Math.floor((loaded / total) * 100);
-                if(counterEl) counterEl.innerText = `${percent}%`;
-                if(progressEl) progressEl.style.width = `${percent}%`;
-            }, () => {
-                if(counterEl) counterEl.innerText = `100%`;
-                if(progressEl) progressEl.style.width = `100%`;
-                setTimeout(() => {
-                    const splash = document.getElementById('splash-screen');
-                    if(splash) splash.classList.add('splash-hidden');
-                }, 400);
-            });
-        }
-
-        function renderNav() {
-            const categories = [...new Set(menuData.map(item => item.category))];
-            let currentActiveCat = categories[0];
-
-            document.getElementById('catNav').innerHTML = categories.map((catName, index) => `
-                <div class="cat-item ${index === 0 ? 'active' : ''}" onclick="filterCat('${catName}', this)">
-                    <div class="cat-img-box">
-                        <img src="${IMAGES_PATH}${catName}.jpg" onerror="this.onerror=null; this.src='${IMAGES_PATH}default.jpg';">
-                    </div>
-                    <span>${catName}</span>
-                </div>
-            `).join('');
-            filterCat(currentActiveCat);
         }
 
         function setPizzaSize(itemId, size) {
@@ -1703,7 +1788,6 @@
                 timestamp: Date.now()
             });
 
-            // حفظ المعرف فوراً وتظهير شريط التتبع للعميل
             localStorage.setItem('mr_hunger_active_order_id', orderId);
             checkAndRestoreUserOrder();
 
