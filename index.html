@@ -5,8 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مستر هنجر | MR. HUNGER - المنيو الرسمي</title>
     
+    <!-- إعدادات الـ PWA والهواتف -->
     <meta name="theme-color" content="#e55300">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MR. HUNGER">
+    <link rel="apple-touch-icon" href="./images/logooo.png">
     <link rel="manifest" href="manifest.json">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -446,7 +452,7 @@
         .zone-card-name { font-size: 0.88rem; font-weight: 800; color: var(--main-text); }
         .zone-card-price { font-size: 0.85rem; font-weight: 900; color: var(--brand-red); background: #ffe6d6; padding: 3px 8px; border-radius: 8px; }
 
-        /* ================= شريط تثبيت التطبيق ================= */
+        /* ================= شريط تثبيت التطبيق PWA ================= */
         .pwa-install-bar {
             position: fixed;
             bottom: 0;
@@ -749,7 +755,7 @@
             font-size: 0.8rem;
         }
 
-        /* تنسيقات زر اختيار النوع ص صاحب مطعم أو زبون */
+        /* تنسيقات اختيار نوع الحساب */
         .role-choice-box {
             display: flex;
             flex-direction: column;
@@ -836,10 +842,10 @@
         </button>
     </div>
 
-    <!-- شريط تثبيت التطبيق -->
+    <!-- شريط تثبيت التطبيق (PWA Install Bar) -->
     <div class="pwa-install-bar" id="pwaInstallBar">
         <div class="pwa-info">
-            <img src="./images/logooo.png" class="pwa-app-icon" alt="App Icon">
+            <img src="./images/logooo.png" class="pwa-app-icon" alt="MR. HUNGER App Icon">
             <div class="pwa-text">
                 <span class="pwa-app-title">تطبيق MR. HUNGER</span>
                 <span class="pwa-app-desc">ثبّت التطبيق لطلب أسرع وتجربة أفضل!</span>
@@ -918,7 +924,7 @@
         </div>
     </div>
 
-    <!-- نافذة الشات للزبون والمطعم -->
+    <!-- نافذة الشات -->
     <div class="modal" id="chatModal" style="z-index: 2800;" onclick="if(event.target==this) closeChatModal()">
         <div class="modal-content" style="border-radius: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
@@ -950,7 +956,7 @@
     <!-- لوحة التحكم الاحترافية الشاملة -->
     <div class="modal" id="adminModal" style="align-items: center;" onclick="if(event.target==this) closeAdminModal()">
         <div class="admin-modal-content">
-            <!-- خطوة 1: اختيار الصفة (صاحب مطعم أم زبون) -->
+            <!-- خطوة 1: اختيار الصفة -->
             <div id="adminRoleSelectStep">
                 <h3 style="margin-bottom: 10px; font-size: 1rem;">اختر نوع الحساب ⚙️</h3>
                 <div class="role-choice-box">
@@ -960,7 +966,7 @@
                 <button class="admin-btn admin-btn-cancel" onclick="closeAdminModal()" style="margin-top: 15px;">إلغاء</button>
             </div>
 
-            <!-- خطوة 2: أدخل كلمة السر لصاحب المطعم -->
+            <!-- خطوة 2: كلمة السر لصاحب المطعم -->
             <div id="adminLoginStep" style="display: none;">
                 <h3 style="margin-bottom: 10px; font-size: 1rem;">تأكيد هويتك كصاحب مطعم 🔐</h3>
                 <input type="password" id="adminPassInput" placeholder="أدخل الرقم السري" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid var(--border-color); text-align:center; font-weight:bold;">
@@ -968,14 +974,13 @@
                 <button class="admin-btn admin-btn-cancel" onclick="showRoleSelectStep()">رجوع</button>
             </div>
 
-            <!-- خطوة 3: لوحة التحكم الحقيقية بعد إدخال كلمة السر -->
+            <!-- خطوة 3: لوحة التحكم -->
             <div id="adminControlStep" style="display: none;">
                 <div class="admin-nav-tabs">
                     <button class="admin-tab-btn active" onclick="switchAdminTab('stockTab', this)">حالة المنيو ⚙️</button>
                     <button class="admin-tab-btn" onclick="switchAdminTab('kitchenTab', this)">شاشة المطبخ 👨‍🍳</button>
                 </div>
 
-                <!-- تبويب التحكم بالمنيو ومواعيد العمل -->
                 <div id="stockTab" class="admin-tab-section active">
                     <div class="work-hours-control-box">
                         <span style="font-size:0.75rem; font-weight:800; color:var(--main-text);">⏰ تعديل مواعيد العمل:</span>
@@ -991,7 +996,6 @@
                     <div class="admin-items-list" id="adminItemsContainer"></div>
                 </div>
 
-                <!-- تبويب شاشة المطبخ والطلبات الحية -->
                 <div id="kitchenTab" class="admin-tab-section">
                     <p style="font-size: 0.72rem; color: var(--desc-text); margin-bottom: 6px;">الطلبات الواردة لحظياً المباشرة:</p>
                     <div id="liveOrdersContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
@@ -1019,11 +1023,11 @@
         let selectedZone = null;
         let deferredPrompt = null;
 
-        // تسجيل الـ Service Worker وإدارة التثبيت الـ PWA
+        /* ================= تسجيل Service Worker وتثبيت PWA ================= */
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker Registered!'))
+                    .then(reg => console.log('PWA Service Worker Registered Successfully!'))
                     .catch(err => console.log('Service Worker Failed:', err));
             });
         }
@@ -1059,6 +1063,7 @@
             if (pwaBar) pwaBar.style.display = 'none';
         }
 
+        /* ================= إعدادات Firebase ================= */
         const firebaseConfig = {
             apiKey: "AIzaSyAyi3bQqd55atTlULXRTRm5HOuwJthlDaI",
             authDomain: "mr-kofta-app.firebaseapp.com",
@@ -1089,10 +1094,7 @@
         let activeChatOrderId = null;
         let chatSenderRole = 'user'; 
 
-        function isWorkingHours() {
-            return true;
-        }
-
+        function isWorkingHours() { return true; }
         function cleanKey(name) { return name.replace(/[.#$\[\]]/g, "_"); }
 
         function requestNotificationPermission() {
@@ -1312,7 +1314,7 @@
                 document.getElementById('adminPassInput').value = '';
                 document.getElementById('adminPassInput').focus();
             } else {
-                alert("أهلاً بك زبوننا العزيز ✨! يمكن الإفادة وتصفح المنيو ومتابعة أوردراتك بكل سهولة.");
+                alert("أهلاً بك زبوننا العزيز ✨! يمكنك تصفح المنيو ومتابعة أوردراتك بكل سهولة.");
                 closeAdminModal();
             }
         }
