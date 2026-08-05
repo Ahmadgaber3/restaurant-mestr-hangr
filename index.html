@@ -1017,8 +1017,9 @@
         ];
 
         let selectedZone = null;
+        let deferredPrompt = null;
 
-        let deferredPrompt;
+        // تسجيل الـ Service Worker وإدارة التثبيت الـ PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -1034,17 +1035,24 @@
             if (pwaBar) pwaBar.style.display = 'flex';
         });
 
-        const installBtn = document.getElementById('pwaInstallBtn');
-        if (installBtn) {
-            installBtn.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') dismissPwaBar();
-                    deferredPrompt = null;
-                }
-            });
-        }
+        window.addEventListener('appinstalled', () => {
+            dismissPwaBar();
+            deferredPrompt = null;
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const installBtn = document.getElementById('pwaInstallBtn');
+            if (installBtn) {
+                installBtn.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        if (outcome === 'accepted') dismissPwaBar();
+                        deferredPrompt = null;
+                    }
+                });
+            }
+        });
 
         function dismissPwaBar() {
             const pwaBar = document.getElementById('pwaInstallBar');
