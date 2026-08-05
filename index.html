@@ -748,6 +748,36 @@
             cursor: pointer;
             font-size: 0.8rem;
         }
+
+        /* تنسيقات زر اختيار النوع ص صاحب مطعم أو زبون */
+        .role-choice-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .role-choice-btn {
+            padding: 12px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--main-text);
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .role-choice-btn.owner {
+            border-color: var(--brand-red);
+            color: var(--brand-red);
+            background: #fff0f3;
+        }
+        [data-theme="dark"] .role-choice-btn.owner {
+            background: #3a1c22;
+        }
     </style>
 </head>
 <body>
@@ -920,13 +950,25 @@
     <!-- لوحة التحكم الاحترافية الشاملة -->
     <div class="modal" id="adminModal" style="align-items: center;" onclick="if(event.target==this) closeAdminModal()">
         <div class="admin-modal-content">
-            <div id="adminLoginStep">
-                <h3 style="margin-bottom: 10px; font-size: 1rem;">لوحة التحكم والإدارة ⚙️</h3>
-                <input type="password" id="adminPassInput" placeholder="أدخل الرقم السري" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid var(--border-color); text-align:center; font-weight:bold;">
-                <button class="admin-btn admin-btn-open" onclick="checkAdminPass()">دخول</button>
-                <button class="admin-btn admin-btn-cancel" onclick="closeAdminModal()">إلغاء</button>
+            <!-- خطوة 1: اختيار الصفة (صاحب مطعم أم زبون) -->
+            <div id="adminRoleSelectStep">
+                <h3 style="margin-bottom: 10px; font-size: 1rem;">اختر نوع الحساب ⚙️</h3>
+                <div class="role-choice-box">
+                    <button class="role-choice-btn owner" onclick="selectRole('owner')">👑 أنا صاحب المطعم</button>
+                    <button class="role-choice-btn" onclick="selectRole('user')">👤 أنا زبون عادي</button>
+                </div>
+                <button class="admin-btn admin-btn-cancel" onclick="closeAdminModal()" style="margin-top: 15px;">إلغاء</button>
             </div>
 
+            <!-- خطوة 2: أدخل كلمة السر لصاحب المطعم -->
+            <div id="adminLoginStep" style="display: none;">
+                <h3 style="margin-bottom: 10px; font-size: 1rem;">تأكيد هويتك كصاحب مطعم 🔐</h3>
+                <input type="password" id="adminPassInput" placeholder="أدخل الرقم السري" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid var(--border-color); text-align:center; font-weight:bold;">
+                <button class="admin-btn admin-btn-open" onclick="checkAdminPass()">دخول</button>
+                <button class="admin-btn admin-btn-cancel" onclick="showRoleSelectStep()">رجوع</button>
+            </div>
+
+            <!-- خطوة 3: لوحة التحكم الحقيقية بعد إدخال كلمة السر -->
             <div id="adminControlStep" style="display: none;">
                 <div class="admin-nav-tabs">
                     <button class="admin-tab-btn active" onclick="switchAdminTab('stockTab', this)">حالة المنيو ⚙️</button>
@@ -1034,6 +1076,7 @@
         let itemsStockStatus = {}; 
         let liveOrdersData = {};
         let initialLoadDone = false;
+        let previousOrdersKeys = [];
         let lastUserOrderStatus = null;
         let activeChatOrderId = null;
         let chatSenderRole = 'user'; 
@@ -1043,6 +1086,24 @@
         }
 
         function cleanKey(name) { return name.replace(/[.#$\[\]]/g, "_"); }
+
+        // طلب الإذن لإرسال الإشعارات على جهاز الموبايل/الكمبيوتر
+        function requestNotificationPermission() {
+            if ("Notification" in window && Notification.permission !== "granted") {
+                Notification.requestPermission();
+            }
+        }
+
+        // إرسال إشعار في أعلى الموبايل لصاحب المطعم
+        function sendPushNotification(title, body) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, {
+                    body: body,
+                    icon: './images/logooo.png',
+                    vibrate: [200, 100, 200]
+                });
+            }
+        }
 
         db.ref('global_restaurant_status').on('value', (snapshot) => {
             const status = snapshot.val() || 'open';
@@ -1078,11 +1139,28 @@
             }
         });
 
+        // الاستماع للأوردرات الجديدة وإرسال إشعار لصاحب المطعم
         db.ref('orders').on('value', (snapshot) => {
             liveOrdersData = snapshot.val() || {};
-            if (initialLoadDone && document.getElementById('adminControlStep').style.display === 'block') {
-                playKitchenBellSound();
+            const currentKeys = Object.keys(liveOrdersData);
+
+            if (initialLoadDone) {
+                // البحث عن أي أوردر جديد تم إضافته
+                const newKeys = currentKeys.filter(k => !previousOrdersKeys.includes(k));
+                if (newKeys.length > 0) {
+                    const isOwnerDevice = localStorage.getItem('mr_hunger_is_owner') === 'true';
+                    if (isOwnerDevice) {
+                        const newOrder = liveOrdersData[newKeys[newKeys.length - 1]];
+                        playKitchenBellSound();
+                        sendPushNotification(
+                            "🔔 طلب جديد وصل الآن!", 
+                            `العميل: ${newOrder.userName || 'جديد'} | الإجمالي: ${newOrder.totalAmount || 0} ج.م`
+                        );
+                    }
+                }
             }
+
+            previousOrdersKeys = currentKeys;
             initialLoadDone = true;
             renderLiveKitchenOrders();
             checkAndRestoreUserOrder();
@@ -1091,15 +1169,24 @@
         function playKitchenBellSound() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-                gain.gain.setValueAtTime(0.3, ctx.currentTime);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.6);
+                
+                // نغمة تنبيه قوية ومكررة للمطبخ
+                const playNote = (freq, time, duration) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, time);
+                    gain.gain.setValueAtTime(0.4, time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(time);
+                    osc.stop(time + duration);
+                };
+
+                const now = ctx.currentTime;
+                playNote(587.33, now, 0.3);      // D5
+                playNote(880.00, now + 0.25, 0.5); // A5
             } catch(e){}
         }
 
@@ -1108,7 +1195,7 @@
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
-                osc.type = 'triangle';
+                osc.type = 'sine';
                 osc.frequency.setValueAtTime(880, ctx.currentTime); 
                 gain.gain.setValueAtTime(0.2, ctx.currentTime);
                 osc.connect(gain);
@@ -1198,9 +1285,36 @@
 
         function openAdminModal() {
             document.getElementById('adminModal').style.display = 'flex';
-            document.getElementById('adminLoginStep').style.display = 'block';
+            
+            // تحقق إذا كان الجهاز مسجلاً مسبقاً كصاحب مطعم
+            const isOwner = localStorage.getItem('mr_hunger_is_owner') === 'true';
+            if (isOwner) {
+                document.getElementById('adminRoleSelectStep').style.display = 'none';
+                document.getElementById('adminLoginStep').style.display = 'none';
+                document.getElementById('adminControlStep').style.display = 'block';
+                renderAdminItemsList();
+                renderLiveKitchenOrders();
+            } else {
+                showRoleSelectStep();
+            }
+        }
+
+        function showRoleSelectStep() {
+            document.getElementById('adminRoleSelectStep').style.display = 'block';
+            document.getElementById('adminLoginStep').style.display = 'none';
             document.getElementById('adminControlStep').style.display = 'none';
-            document.getElementById('adminPassInput').value = '';
+        }
+
+        function selectRole(role) {
+            if (role === 'owner') {
+                document.getElementById('adminRoleSelectStep').style.display = 'none';
+                document.getElementById('adminLoginStep').style.display = 'block';
+                document.getElementById('adminPassInput').value = '';
+                document.getElementById('adminPassInput').focus();
+            } else {
+                alert("أهلاً بك زبوننا العزيز ✨! يمكن الإفادة وتصفح المنيو ومتابعة أوردراتك بكل سهولة.");
+                closeAdminModal();
+            }
         }
 
         function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
@@ -1208,6 +1322,10 @@
         function checkAdminPass() {
             const input = document.getElementById('adminPassInput').value;
             if (input === SECRET_PIN) {
+                // حفظ الموبايل على أنه جهاز صاحب المطعم لتلقي التنبيهات دائماً
+                localStorage.setItem('mr_hunger_is_owner', 'true');
+                requestNotificationPermission();
+
                 document.getElementById('adminLoginStep').style.display = 'none';
                 document.getElementById('adminControlStep').style.display = 'block';
                 renderAdminItemsList();
