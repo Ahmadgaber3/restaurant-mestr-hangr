@@ -557,7 +557,7 @@
 
         .submit-btn { background: var(--brand-red); color: #ffffff; border: none; padding: 13px; border-radius: 14px; width: 100%; font-weight: 800; font-size: 0.98rem; cursor: pointer; box-shadow: 0 4px 14px rgba(229, 83, 0, 0.35); margin-top: 12px; }
 
-        /* ================= تعديل وتوسيع لوحة التحكم المفتوحة ================= */
+        /* ================= لوحة التحكم ================= */
         .admin-modal-content {
             background: var(--card-inner-bg);
             padding: 20px;
@@ -614,7 +614,6 @@
         .global-btn.open { background: #2e7d32; color: #fff; }
         .global-btn.close { background: #c62828; color: #fff; }
         
-        /* زيادة مساحة عرض الأصناف وتكبيرها */
         .admin-items-list { overflow-y: auto; max-height: 55vh; margin: 4px 0; padding-left: 5px; display: flex; flex-direction: column; gap: 8px; }
         .admin-item-row { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border-color); }
         .admin-item-name { font-size: 0.82rem; font-weight: 800; color: var(--main-text); text-align: right; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 10px; }
@@ -947,7 +946,7 @@
         </div>
     </div>
 
-    <!-- لوحة التحكم بالرقم السري (تُطلب دائماً) -->
+    <!-- لوحة التحكم بالرقم السري -->
     <div class="modal" id="adminModal" style="align-items: center;" onclick="if(event.target==this) closeAdminModal()">
         <div class="admin-modal-content">
             <div id="adminLoginStep">
@@ -964,7 +963,6 @@
                 </div>
 
                 <div id="stockTab" class="admin-tab-section active">
-                    <!-- أزرار التحكم المرفوعة للأعلى مباشرة -->
                     <div class="global-control-box">
                         <button class="global-btn open" onclick="setGlobalStoreStatus('open')">فتح الكل ✅</button>
                         <button class="global-btn close" onclick="setGlobalStoreStatus('closed')">قفل الكل (نفدت الكمية) 🚫</button>
@@ -1001,7 +999,7 @@
         let orderType = 'delivery'; 
         let deferredPrompt = null;
 
-        /* ================= تسجيل Service Worker وتثبيت PWA ================= */
+        /* Service Worker & PWA */
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -1041,7 +1039,7 @@
             if (pwaBar) pwaBar.style.display = 'none';
         }
 
-        /* ================= إعدادات Firebase ================= */
+        /* Firebase */
         const firebaseConfig = {
             apiKey: "AIzaSyAyi3bQqd55atTlULXRTRm5HOuwJthlDaI",
             authDomain: "mr-kofta-app.firebaseapp.com",
@@ -1056,7 +1054,7 @@
         const db = firebase.database();
 
         const IMAGES_PATH = "./images/"; 
-        const SECRET_PIN = "111222"; // الرقم السري لحماية اللوحة
+        const SECRET_PIN = "111222"; 
 
         let menuData = [], cart = [];
         let itemSizeSelection = {}; 
@@ -1243,7 +1241,6 @@
             }
         }
 
-        /* تطلب الدخول بالرقم السري دائماً بدون حفظ الدخول */
         function openAdminModal() {
             document.getElementById('adminModal').style.display = 'flex';
             document.getElementById('adminLoginStep').style.display = 'block';
@@ -1500,6 +1497,7 @@
             return lines;
         }
 
+        /* دالة جلب المنيو المحدثة بالكامل لقراءة أعمدة الشيت مباشرة */
         async function loadMenuFromSheet(isBackgroundSync = false) {
             const counterEl = document.getElementById('loadCounter');
             const progressEl = document.getElementById('loadProgress');
@@ -1511,15 +1509,12 @@
 
                 if (parsedRows.length < 2) return;
 
-                const headers = parsedRows[0].map(h => h.toLowerCase());
-
-                const catIdx = headers.findIndex(h => h.includes('قسم') || h.includes('category') || h.includes('القسم'));
-                const nameIdx = headers.findIndex(h => h.includes('اسم') || h.includes('صنف') || h.includes('item') || h.includes('الاسم') || h.includes('الصنف'));
-                const descIdx = headers.findIndex(h => h.includes('وصف') || h.includes('desc') || h.includes('انجليزي') || h.includes('المكونات'));
-
-                const priceSIdx = headers.findIndex(h => h.includes('سعر') || h.includes('price') || h.includes('صغير') || h.includes('s'));
-                const priceMIdx = headers.findIndex(h => h.includes('وسط') || h.includes('m'));
-                const priceLIdx = headers.findIndex(h => h.includes('كبير') || h.includes('l'));
+                // دالة تنظيف الخانة وإرجاع الرقم فقط
+                const cleanPrice = (val) => {
+                    if (!val) return 0;
+                    const match = String(val).replace(/[^0-9.]/g, '');
+                    return parseFloat(match) || 0;
+                };
 
                 let parsedMenu = [];
 
@@ -1527,21 +1522,23 @@
                     const row = parsedRows[i];
                     if (!row || row.length === 0) continue;
 
-                    let catName = (catIdx !== -1 && row[catIdx]) ? row[catIdx] : "عام";
-                    let itemName = (nameIdx !== -1 && row[nameIdx]) ? row[nameIdx] : "";
-                    let itemDesc = (descIdx !== -1 && row[descIdx]) ? row[descIdx] : "";
+                    // جلب اسم الصنف مباشرة من العمود B (المؤشر 1) أو C (المؤشر 2)
+                    let itemName = row[1] || row[2] || "";
+                    if (!itemName || itemName.toLowerCase() === 'name') continue;
 
-                    if (!itemName) continue;
+                    // القراءة المباشرة من أعمدة الشيت المعلنة في الصورة (D, E, F)
+                    let pS = cleanPrice(row[3]); // العمود D (سعر S)
+                    let pM = cleanPrice(row[4]) || pS; // العمود E (سعر M)
+                    let pL = cleanPrice(row[5]) || pM; // العمود F (سعر L)
 
-                    let pS = parseFloat((priceSIdx !== -1 && row[priceSIdx]) ? row[priceSIdx] : 0) || 0;
-                    let pM = parseFloat((priceMIdx !== -1 && row[priceMIdx]) ? row[priceMIdx] : 0) || pS;
-                    let pL = parseFloat((priceLIdx !== -1 && row[priceLIdx]) ? row[priceLIdx] : 0) || pM;
+                    // القسم الافتراضي أو استخراجه من العمود A
+                    let catName = row[0] || "بيتزا";
 
                     parsedMenu.push({
                         id: i,
                         category: catName,
                         name: itemName,
-                        desc: itemDesc,
+                        desc: "",
                         prices: { S: pS, M: pM, L: pL }
                     });
                 }
