@@ -36,8 +36,12 @@
             --white: #ffffff; 
             --header-bg: #ffffff; 
             --card-shadow: 0 6px 16px rgba(15, 23, 42, 0.08); 
-            --border-color: #e2e8f0; 
+            --border-color: #cbd5e1; 
             --input-bg: #f8fafc;
+            
+            --btn-unselected-bg: #e2e8f0;
+            --btn-unselected-text: #334155;
+            --btn-unselected-border: #94a3b8;
         }
 
         [data-theme="dark"] {
@@ -55,6 +59,10 @@
             --card-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); 
             --border-color: #334155; 
             --input-bg: #2d3748;
+
+            --btn-unselected-bg: #2a2a2a;
+            --btn-unselected-text: #cbd5e1;
+            --btn-unselected-border: #475569;
         }
 
         * { 
@@ -497,7 +505,7 @@
         .cart-item-price { color: var(--brand-red); font-weight: 800; font-size: 0.8rem; display: block; }
         .remove-btn { color: #ef4444; font-weight: 800; font-size: 0.75rem; cursor: pointer; padding: 4px; }
 
-        /* ================= تصميم أزرار الاستلام البسيطة (تيك أواي ودليفري) ================= */
+        /* ================= أزرار الاستلام ================= */
         .user-fields { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
         
         .user-fields input { 
@@ -515,43 +523,41 @@
         .user-fields input:focus { border-color: var(--brand-red); }
 
         .order-type-container { margin-bottom: 4px; text-align: right; }
-        .order-type-title { font-size: 0.78rem; font-weight: 800; color: var(--desc-text); display: block; margin-bottom: 8px; }
+        .order-type-title { font-size: 0.8rem; font-weight: 800; color: var(--main-text); display: block; margin-bottom: 8px; }
         
         .order-type-toggle { 
             display: flex; 
-            gap: 8px; 
+            gap: 10px; 
             width: 100%; 
-            background: var(--input-bg); 
-            padding: 4px; 
-            border-radius: 12px; 
-            border: 1px solid var(--border-color);
         }
         
         .type-btn-select { 
             flex: 1; 
-            padding: 8px 10px; 
-            border-radius: 9px; 
-            border: none; 
-            background: transparent; 
-            color: var(--desc-text); 
+            padding: 10px 12px; 
+            border-radius: 12px; 
+            border: 2px solid var(--btn-unselected-border); 
+            background: var(--btn-unselected-bg); 
+            color: var(--btn-unselected-text); 
             font-weight: 800; 
-            font-size: 0.8rem; 
+            font-size: 0.85rem; 
             cursor: pointer; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            gap: 5px; 
+            gap: 6px; 
             transition: all 0.2s ease;
         }
 
         .type-btn-select.active { 
-            background: var(--card-inner-bg); 
-            color: var(--brand-red); 
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            background: var(--brand-red) !important; 
+            color: #ffffff !important; 
+            border-color: var(--brand-red) !important;
+            box-shadow: 0 4px 12px rgba(229, 83, 0, 0.35);
         }
 
         .submit-btn { background: var(--brand-red); color: #ffffff; border: none; padding: 13px; border-radius: 14px; width: 100%; font-weight: 800; font-size: 0.98rem; cursor: pointer; box-shadow: 0 4px 14px rgba(229, 83, 0, 0.35); margin-top: 12px; }
 
+        /* ================= تعديل وتوسيع لوحة التحكم المفتوحة ================= */
         .admin-modal-content {
             background: var(--card-inner-bg);
             padding: 20px;
@@ -597,39 +603,19 @@
             flex-direction: column;
             gap: 8px;
             overflow-y: auto;
-            max-height: 60vh;
+            max-height: 65vh;
             padding-left: 4px;
         }
 
         .admin-tab-section.active { display: flex; }
 
-        .global-control-box { display: flex; gap: 8px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color); }
+        .global-control-box { display: flex; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
         .global-btn { flex: 1; padding: 10px; border-radius: 10px; border: none; font-weight: 800; font-size: 0.82rem; cursor: pointer; }
         .global-btn.open { background: #2e7d32; color: #fff; }
         .global-btn.close { background: #c62828; color: #fff; }
-
-        .work-hours-control-box {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            padding-bottom: 12px;
-            margin-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
-            text-align: right;
-        }
-
-        .work-hours-control-box input {
-            padding: 9px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background: var(--input-bg);
-            color: var(--main-text);
-            font-size: 0.8rem;
-            font-weight: 700;
-            outline: none;
-        }
         
-        .admin-items-list { overflow-y: auto; max-height: 50vh; margin: 8px 0; padding-left: 5px; display: flex; flex-direction: column; gap: 8px; }
+        /* زيادة مساحة عرض الأصناف وتكبيرها */
+        .admin-items-list { overflow-y: auto; max-height: 55vh; margin: 4px 0; padding-left: 5px; display: flex; flex-direction: column; gap: 8px; }
         .admin-item-row { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border-color); }
         .admin-item-name { font-size: 0.82rem; font-weight: 800; color: var(--main-text); text-align: right; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 10px; }
         .admin-toggle-btn { padding: 6px 12px; border-radius: 8px; border: none; font-size: 0.75rem; font-weight: 800; cursor: pointer; white-space: nowrap; }
@@ -902,7 +888,7 @@
                 </div>
             </div>
 
-            <!-- خيارات طريقة الاستلام البسيطة -->
+            <!-- خيارات طريقة الاستلام -->
             <div class="user-fields">
                 <div class="order-type-container">
                     <span class="order-type-title">طريقة الاستلام:</span>
@@ -961,7 +947,7 @@
         </div>
     </div>
 
-    <!-- لوحة التحكم الحصرية بالرقم السري (111222) -->
+    <!-- لوحة التحكم بالرقم السري (تُطلب دائماً) -->
     <div class="modal" id="adminModal" style="align-items: center;" onclick="if(event.target==this) closeAdminModal()">
         <div class="admin-modal-content">
             <div id="adminLoginStep">
@@ -978,12 +964,7 @@
                 </div>
 
                 <div id="stockTab" class="admin-tab-section active">
-                    <div class="work-hours-control-box">
-                        <span style="font-size:0.75rem; font-weight:800; color:var(--main-text);">⏰ تعديل مواعيد العمل:</span>
-                        <input type="text" id="adminWorkHoursInput" placeholder="أدخل مواعيد العمل الجديدة">
-                        <button class="admin-btn admin-btn-open" style="padding:8px; margin:0;" onclick="saveWorkHours()">حفظ المواعيد الجديدة 💾</button>
-                    </div>
-
+                    <!-- أزرار التحكم المرفوعة للأعلى مباشرة -->
                     <div class="global-control-box">
                         <button class="global-btn open" onclick="setGlobalStoreStatus('open')">فتح الكل ✅</button>
                         <button class="global-btn close" onclick="setGlobalStoreStatus('closed')">قفل الكل (نفدت الكمية) 🚫</button>
@@ -1017,7 +998,7 @@
         ];
 
         let selectedZone = null;
-        let orderType = 'delivery'; // delivery || takeaway
+        let orderType = 'delivery'; 
         let deferredPrompt = null;
 
         /* ================= تسجيل Service Worker وتثبيت PWA ================= */
@@ -1075,7 +1056,7 @@
         const db = firebase.database();
 
         const IMAGES_PATH = "./images/"; 
-        const SECRET_PIN = "111222"; // تم التحديث إلى 111222
+        const SECRET_PIN = "111222"; // الرقم السري لحماية اللوحة
 
         let menuData = [], cart = [];
         let itemSizeSelection = {}; 
@@ -1117,25 +1098,6 @@
             refreshMenuDisplay();
         });
 
-        db.ref('work_hours_text').on('value', (snapshot) => {
-            const hoursText = snapshot.val() || "مواعيد العمل: يومياً من 12:00 م لـ 2:00 ص";
-            const inputEl = document.getElementById('adminWorkHoursInput');
-            if (inputEl) inputEl.value = hoursText;
-        });
-
-        function saveWorkHours() {
-            const inputEl = document.getElementById('adminWorkHoursInput');
-            if (!inputEl) return;
-            const newText = inputEl.value.trim();
-            if (!newText) {
-                alert('برجاء أدخل مواعيد العمل أولاً!');
-                return;
-            }
-            db.ref('work_hours_text').set(newText)
-                .then(() => alert('تم تحديث مواعيد العمل بنجاح! ✅'))
-                .catch((err) => alert('حدث خطأ: ' + err.message));
-        }
-
         db.ref('items_stock').on('value', (snapshot) => {
             itemsStockStatus = snapshot.val() || {};
             refreshMenuDisplay();
@@ -1151,15 +1113,12 @@
             if (initialLoadDone) {
                 const newKeys = currentKeys.filter(k => !previousOrdersKeys.includes(k));
                 if (newKeys.length > 0) {
-                    const isOwnerDevice = localStorage.getItem('mr_hunger_is_owner') === 'true';
-                    if (isOwnerDevice) {
-                        const newOrder = liveOrdersData[newKeys[newKeys.length - 1]];
-                        playKitchenBellSound();
-                        sendPushNotification(
-                            "🔔 طلب جديد وصل الآن!", 
-                            `العميل: ${newOrder.userName || 'جديد'} | الإجمالي: ${newOrder.totalAmount || 0} ج.م`
-                        );
-                    }
+                    const newOrder = liveOrdersData[newKeys[newKeys.length - 1]];
+                    playKitchenBellSound();
+                    sendPushNotification(
+                        "🔔 طلب جديد وصل الآن!", 
+                        `العميل: ${newOrder.userName || 'جديد'} | الإجمالي: ${newOrder.totalAmount || 0} ج.م`
+                    );
                 }
             }
 
@@ -1284,27 +1243,22 @@
             }
         }
 
+        /* تطلب الدخول بالرقم السري دائماً بدون حفظ الدخول */
         function openAdminModal() {
             document.getElementById('adminModal').style.display = 'flex';
-            const isOwner = localStorage.getItem('mr_hunger_is_owner') === 'true';
-            if (isOwner) {
-                document.getElementById('adminLoginStep').style.display = 'none';
-                document.getElementById('adminControlStep').style.display = 'block';
-                renderAdminItemsList();
-                renderLiveKitchenOrders();
-            } else {
-                document.getElementById('adminLoginStep').style.display = 'block';
-                document.getElementById('adminControlStep').style.display = 'none';
-                document.getElementById('adminPassInput').value = '';
-            }
+            document.getElementById('adminLoginStep').style.display = 'block';
+            document.getElementById('adminControlStep').style.display = 'none';
+            document.getElementById('adminPassInput').value = '';
+            document.getElementById('adminPassInput').focus();
         }
 
-        function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
+        function closeAdminModal() { 
+            document.getElementById('adminModal').style.display = 'none'; 
+        }
 
         function checkAdminPass() {
             const input = document.getElementById('adminPassInput').value;
             if (input === SECRET_PIN) {
-                localStorage.setItem('mr_hunger_is_owner', 'true');
                 requestNotificationPermission();
 
                 document.getElementById('adminLoginStep').style.display = 'none';
