@@ -346,6 +346,51 @@
         .price-num { font-weight: 900; }
         .price-txt { font-size: 0.72rem; font-weight: 800; color: var(--brand-red); }
 
+        /* ================= شريط تتبع الطلب المرتجع للزبون ================= */
+        .user-order-tracker-bar {
+            position: fixed;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 480px;
+            background: var(--header-bg);
+            border: 2px solid var(--brand-red);
+            border-radius: 16px;
+            padding: 10px 14px;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+            z-index: 1800;
+            animation: slideUpIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideUpIn {
+            from { transform: translate(-50%, 100%); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        .tracker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            font-weight: 800;
+        }
+
+        .tracker-status-tag {
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+
+        .status-prep { background: #fef08a; color: #854d0e; }
+        .status-delivering { background: #bfdbfe; color: #1e40af; }
+        .status-completed { background: #dcfce7; color: #166534; }
+        .status-canceled { background: #fee2e2; color: #991b1b; }
+
         .chat-btn-trigger {
             background: var(--brand-red);
             color: #ffffff;
@@ -772,6 +817,20 @@
 
     <main id="menuList" class="menu-list"></main>
 
+    <!-- شريط تتبع حالة الطلب للزبون (تم إرجاعه وإعادة تفعيله) -->
+    <div class="user-order-tracker-bar" id="userOrderTrackerBar">
+        <div class="tracker-header">
+            <span>🛵 متابعة حالة أوردرك اللحظية:</span>
+            <span class="tracker-status-tag status-prep" id="userTrackerStatusTag">⏳ جاري التجهيز</span>
+        </div>
+        <div style="font-size: 0.72rem; color: var(--desc-text); text-align: right;" id="userTrackerDesc">
+            تم استلام طلبك في المطبخ وجاري التجهيز الآن بكل حب ✨
+        </div>
+        <button class="chat-btn-trigger" onclick="openUserChatModal()">
+            💬 شات مع المطعم
+        </button>
+    </div>
+
     <!-- شريط تثبيت التطبيق (PWA Install Bar) -->
     <div class="pwa-install-bar" id="pwaInstallBar">
         <div class="pwa-info">
@@ -1007,6 +1066,7 @@
         let liveOrdersData = {};
         let initialLoadDone = false;
         let previousOrdersKeys = [];
+        let lastUserOrderStatus = null;
         let activeChatOrderId = null;
         let chatSenderRole = 'user'; 
         let previousChatCount = 0;
@@ -1049,7 +1109,7 @@
             }
         });
 
-        /* الاستماع للطلبات الجديدة وإظهار إشعار في أعلي شاشه الهاتف */
+        /* الاستماع للطلبات الجديدة حصرياً لجهاز صاحب المطعم المفعل بالرقم السري */
         db.ref('orders').on('value', (snapshot) => {
             liveOrdersData = snapshot.val() || {};
             const currentKeys = Object.keys(liveOrdersData);
@@ -1072,6 +1132,7 @@
             previousOrdersKeys = currentKeys;
             initialLoadDone = true;
             renderLiveKitchenOrders();
+            checkAndRestoreUserOrder();
         });
 
         function playKitchenBellSound() {
@@ -1096,6 +1157,7 @@
             } catch(e){}
         }
 
+        /* صوت التنبيه للزبون عند استلام إشعار ببدء أو تغيير حالة أوردره */
         function playUserNotificationSound() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1109,6 +1171,63 @@
                 osc.start();
                 osc.stop(ctx.currentTime + 0.35);
             } catch(e){}
+        }
+
+        /* متابعة واسترجاع حالة الطلب للزبون وإصدار صوت وإشعار عند أي تغيير */
+        function checkAndRestoreUserOrder() {
+            const activeOrderId = localStorage.getItem('mr_hunger_active_order_id');
+            if (!activeOrderId) return;
+
+            const order = liveOrdersData[activeOrderId];
+            const trackerBar = document.getElementById('userOrderTrackerBar');
+            const tag = document.getElementById('userTrackerStatusTag');
+            const desc = document.getElementById('userTrackerDesc');
+
+            if (!order) {
+                if(trackerBar) trackerBar.style.display = 'none';
+                return;
+            }
+
+            const currentStatus = order.status || 'prep';
+            if(trackerBar) trackerBar.style.display = 'flex';
+
+            // تشغيل صوت وإشعار للنظام عند تغيير الحالة
+            if (lastUserOrderStatus && lastUserOrderStatus !== currentStatus) {
+                playUserNotificationSound();
+                let notifyTxt = 'تحديث جديد على طلبك!';
+                if (currentStatus === 'delivering') notifyTxt = '🛵 طلبك خرج للتوصيل وفي طريقه إليك!';
+                else if (currentStatus === 'completed') notifyTxt = '✅ تم تسليم طلبك بنجاح. وبالهناء والشفاء!';
+                else if (currentStatus === 'canceled') notifyTxt = '❌ تم إلغاء الطلب من المطعم.';
+                
+                sendPushNotification("🛵 حالة الأوردر", notifyTxt);
+            }
+            lastUserOrderStatus = currentStatus;
+
+            if (currentStatus === 'prep') {
+                tag.className = 'tracker-status-tag status-prep';
+                tag.innerText = '⏳ جاري التجهيز';
+                desc.innerText = 'تم استلام طلبك في المطبخ وجاري التجهيز الآن بكل حب ✨';
+            } else if (currentStatus === 'delivering') {
+                tag.className = 'tracker-status-tag status-delivering';
+                tag.innerText = '🛵 خرج للتوصيل';
+                desc.innerText = 'طلبك خرج الآن مع الدليفري وفي طريقه إليك! 🎉';
+            } else if (currentStatus === 'completed') {
+                tag.className = 'tracker-status-tag status-completed';
+                tag.innerText = '✅ تم التسليم';
+                desc.innerText = 'نتمنى لك وجبة شهية! شكراً لطلبك من MR. HUNGER ✨';
+                setTimeout(() => {
+                    if(trackerBar) trackerBar.style.display = 'none';
+                    localStorage.removeItem('mr_hunger_active_order_id');
+                }, 10000);
+            } else if (currentStatus === 'canceled') {
+                tag.className = 'tracker-status-tag status-canceled';
+                tag.innerText = '❌ تم إلغاء الطلب';
+                desc.innerText = 'تم إلغاء الطلب. يرجى التواصل مع المطعم لأي استفسار.';
+                setTimeout(() => {
+                    if(trackerBar) trackerBar.style.display = 'none';
+                    localStorage.removeItem('mr_hunger_active_order_id');
+                }, 8000);
+            }
         }
 
         function refreshMenuDisplay() {
@@ -1140,7 +1259,6 @@
             }
         }
 
-        /* تطلب الدخول بالرقم السري دائماً بدون حفظ الدخول */
         function openAdminModal() {
             document.getElementById('adminModal').style.display = 'flex';
             document.getElementById('adminLoginStep').style.display = 'block';
@@ -1309,7 +1427,6 @@
 
                 if (chatArray.length > previousChatCount && previousChatCount > 0) {
                     const lastMsg = chatArray[chatArray.length - 1];
-                    // الإشعار يوصل للأطراف المخالفين للراسل
                     if (lastMsg.sender !== chatSenderRole) {
                         playUserNotificationSound();
                         const senderName = lastMsg.sender === 'user' ? 'العميل' : 'المطعم';
@@ -1799,6 +1916,7 @@
 
             localStorage.setItem('mr_hunger_active_order_id', orderId);
             listenForUserChatBackground();
+            checkAndRestoreUserOrder();
 
             let msg = `*طلب جديد - MR. HUNGER ✨*\n──────────────\n`;
             msg += `👤 *الاسم:* ${n}\n📱 *الموبايل:* ${p}\n🛵 *نوع الطلب:* ${orderType === 'delivery' ? 'دليفري وتوصيل' : 'استلام من الفرع (تيك أواي)'}\n`;
