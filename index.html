@@ -346,51 +346,6 @@
         .price-num { font-weight: 900; }
         .price-txt { font-size: 0.72rem; font-weight: 800; color: var(--brand-red); }
 
-        /* ================= شريط تتبع الطلب للزبون ================= */
-        .user-order-tracker-bar {
-            position: fixed;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 92%;
-            max-width: 480px;
-            background: var(--header-bg);
-            border: 2px solid var(--brand-red);
-            border-radius: 16px;
-            padding: 10px 14px;
-            display: none;
-            flex-direction: column;
-            gap: 6px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-            z-index: 1800;
-            animation: slideUpIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes slideUpIn {
-            from { transform: translate(-50%, 100%); opacity: 0; }
-            to { transform: translate(-50%, 0); opacity: 1; }
-        }
-
-        .tracker-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.82rem;
-            font-weight: 800;
-        }
-
-        .tracker-status-tag {
-            padding: 4px 10px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            font-weight: 800;
-        }
-
-        .status-prep { background: #fef08a; color: #854d0e; }
-        .status-delivering { background: #bfdbfe; color: #1e40af; }
-        .status-completed { background: #dcfce7; color: #166534; }
-        .status-canceled { background: #fee2e2; color: #991b1b; }
-
         .chat-btn-trigger {
             background: var(--brand-red);
             color: #ffffff;
@@ -817,20 +772,6 @@
 
     <main id="menuList" class="menu-list"></main>
 
-    <!-- شريط تتبع حالة الطلب للزبون -->
-    <div class="user-order-tracker-bar" id="userOrderTrackerBar">
-        <div class="tracker-header">
-            <span>🛵 متابعة حالة أوردرك اللحظية:</span>
-            <span class="tracker-status-tag status-prep" id="userTrackerStatusTag">⏳ جاري التجهيز</span>
-        </div>
-        <div style="font-size: 0.72rem; color: var(--desc-text); text-align: right;" id="userTrackerDesc">
-            تم استلام طلبك في المطبخ وجاري التجهيز الآن بكل حب ✨
-        </div>
-        <button class="chat-btn-trigger" onclick="openUserChatModal()">
-            💬 شات مع المطعم
-        </button>
-    </div>
-
     <!-- شريط تثبيت التطبيق (PWA Install Bar) -->
     <div class="pwa-install-bar" id="pwaInstallBar">
         <div class="pwa-info">
@@ -999,7 +940,7 @@
         let orderType = 'delivery'; 
         let deferredPrompt = null;
 
-        /* Service Worker & PWA */
+        /* Service Worker & PWA Service */
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -1066,26 +1007,30 @@
         let liveOrdersData = {};
         let initialLoadDone = false;
         let previousOrdersKeys = [];
-        let lastUserOrderStatus = null;
         let activeChatOrderId = null;
         let chatSenderRole = 'user'; 
+        let previousChatCount = 0;
 
         function isWorkingHours() { return true; }
         function cleanKey(name) { return name.replace(/[.#$\[\]]/g, "_"); }
 
+        /* تفعيل صلاحية إشعارات النظام في الشاشة العلوية */
         function requestNotificationPermission() {
-            if ("Notification" in window && Notification.permission !== "granted") {
+            if ("Notification" in window) {
                 Notification.requestPermission();
             }
         }
 
+        /* إرسال إشعار للنظام يظهر بأعلى الشاشة */
         function sendPushNotification(title, body) {
             if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(title, {
-                    body: body,
-                    icon: './images/logooo.png',
-                    vibrate: [200, 100, 200]
-                });
+                try {
+                    new Notification(title, {
+                        body: body,
+                        icon: './images/logooo.png',
+                        vibrate: [200, 100, 200]
+                    });
+                } catch(e) {}
             }
         }
 
@@ -1104,6 +1049,7 @@
             }
         });
 
+        /* الاستماع للطلبات الجديدة وإظهار إشعار في أعلي شاشه الهاتف */
         db.ref('orders').on('value', (snapshot) => {
             liveOrdersData = snapshot.val() || {};
             const currentKeys = Object.keys(liveOrdersData);
@@ -1111,19 +1057,21 @@
             if (initialLoadDone) {
                 const newKeys = currentKeys.filter(k => !previousOrdersKeys.includes(k));
                 if (newKeys.length > 0) {
-                    const newOrder = liveOrdersData[newKeys[newKeys.length - 1]];
-                    playKitchenBellSound();
-                    sendPushNotification(
-                        "🔔 طلب جديد وصل الآن!", 
-                        `العميل: ${newOrder.userName || 'جديد'} | الإجمالي: ${newOrder.totalAmount || 0} ج.م`
-                    );
+                    const isOwnerDevice = localStorage.getItem('mr_hunger_is_owner') === 'true';
+                    if (isOwnerDevice) {
+                        const newOrder = liveOrdersData[newKeys[newKeys.length - 1]];
+                        playKitchenBellSound();
+                        sendPushNotification(
+                            "🔔 طلب جديد وصل الآن من مطعمك!", 
+                            `العميل: ${newOrder.userName || 'جديد'} | الإجمالي: ${newOrder.totalAmount || 0} ج.م`
+                        );
+                    }
                 }
             }
 
             previousOrdersKeys = currentKeys;
             initialLoadDone = true;
             renderLiveKitchenOrders();
-            checkAndRestoreUserOrder();
         });
 
         function playKitchenBellSound() {
@@ -1163,55 +1111,6 @@
             } catch(e){}
         }
 
-        function checkAndRestoreUserOrder() {
-            const activeOrderId = localStorage.getItem('mr_hunger_active_order_id');
-            if (!activeOrderId) return;
-
-            const order = liveOrdersData[activeOrderId];
-            const trackerBar = document.getElementById('userOrderTrackerBar');
-            const tag = document.getElementById('userTrackerStatusTag');
-            const desc = document.getElementById('userTrackerDesc');
-
-            if (!order) {
-                if(trackerBar) trackerBar.style.display = 'none';
-                return;
-            }
-
-            const currentStatus = order.status || 'prep';
-            if(trackerBar) trackerBar.style.display = 'flex';
-
-            if (lastUserOrderStatus && lastUserOrderStatus !== currentStatus) {
-                playUserNotificationSound();
-            }
-            lastUserOrderStatus = currentStatus;
-
-            if (currentStatus === 'prep') {
-                tag.className = 'tracker-status-tag status-prep';
-                tag.innerText = '⏳ جاري التجهيز';
-                desc.innerText = 'تم استلام طلبك في المطبخ وجاري التجهيز الآن بكل حب ✨';
-            } else if (currentStatus === 'delivering') {
-                tag.className = 'tracker-status-tag status-delivering';
-                tag.innerText = '🛵 خرج للتوصيل';
-                desc.innerText = 'طلبك خرج الآن مع الدليفري وفي طريقه إليك! 🎉';
-            } else if (currentStatus === 'completed') {
-                tag.className = 'tracker-status-tag status-completed';
-                tag.innerText = '✅ تم التسليم';
-                desc.innerText = 'نتمنى لك وجبة شهية! شكراً لطلبك من MR. HUNGER ✨';
-                setTimeout(() => {
-                    if(trackerBar) trackerBar.style.display = 'none';
-                    localStorage.removeItem('mr_hunger_active_order_id');
-                }, 10000);
-            } else if (currentStatus === 'canceled') {
-                tag.className = 'tracker-status-tag status-canceled';
-                tag.innerText = '❌ تم إلغاء الطلب';
-                desc.innerText = 'تم إلغاء الطلب. يرجى التواصل مع المطعم لأي استفسار.';
-                setTimeout(() => {
-                    if(trackerBar) trackerBar.style.display = 'none';
-                    localStorage.removeItem('mr_hunger_active_order_id');
-                }, 8000);
-            }
-        }
-
         function refreshMenuDisplay() {
             if (menuData.length > 0) {
                 const activeCatDOM = document.querySelector('.cat-item.active span');
@@ -1241,6 +1140,7 @@
             }
         }
 
+        /* تطلب الدخول بالرقم السري دائماً بدون حفظ الدخول */
         function openAdminModal() {
             document.getElementById('adminModal').style.display = 'flex';
             document.getElementById('adminLoginStep').style.display = 'block';
@@ -1256,6 +1156,7 @@
         function checkAdminPass() {
             const input = document.getElementById('adminPassInput').value;
             if (input === SECRET_PIN) {
+                localStorage.setItem('mr_hunger_is_owner', 'true');
                 requestNotificationPermission();
 
                 document.getElementById('adminLoginStep').style.display = 'none';
@@ -1399,11 +1300,25 @@
             }
         }
 
+        /* استماع للرسائل وإرسال إشعار للنظام في أعلى الشاشة */
         function listenToChatMessages(orderId) {
             const list = document.getElementById('chatMessagesList');
             db.ref(`orders/${orderId}/chats`).on('value', (snapshot) => {
                 const chats = snapshot.val() || {};
-                list.innerHTML = Object.values(chats).map(msg => {
+                const chatArray = Object.values(chats);
+
+                if (chatArray.length > previousChatCount && previousChatCount > 0) {
+                    const lastMsg = chatArray[chatArray.length - 1];
+                    // الإشعار يوصل للأطراف المخالفين للراسل
+                    if (lastMsg.sender !== chatSenderRole) {
+                        playUserNotificationSound();
+                        const senderName = lastMsg.sender === 'user' ? 'العميل' : 'المطعم';
+                        sendPushNotification(`💬 رسالة جديدة من ${senderName}`, lastMsg.text);
+                    }
+                }
+                previousChatCount = chatArray.length;
+
+                list.innerHTML = chatArray.map(msg => {
                     const isUser = msg.sender === 'user';
                     const roleClass = isUser ? 'user' : 'admin';
                     const label = isUser ? 'أنت' : 'المطعم';
@@ -1427,6 +1342,29 @@
             input.value = '';
         }
 
+        /* الاستماع التلقائي للطلب النشط للزبون وإظهار إشعار شات له حتى لو نافذة الشات مغلقة */
+        function listenForUserChatBackground() {
+            const activeOrderId = localStorage.getItem('mr_hunger_active_order_id');
+            if (!activeOrderId) return;
+
+            let isFirstLoad = true;
+            db.ref(`orders/${activeOrderId}/chats`).on('value', (snapshot) => {
+                const chats = snapshot.val() || {};
+                const chatArray = Object.values(chats);
+                if (isFirstLoad) {
+                    isFirstLoad = false;
+                    return;
+                }
+                if (chatArray.length > 0) {
+                    const lastMsg = chatArray[chatArray.length - 1];
+                    if (lastMsg.sender === 'admin') {
+                        playUserNotificationSound();
+                        sendPushNotification("💬 رسالة من المطعم", lastMsg.text);
+                    }
+                }
+            });
+        }
+
         function handleThemeToggle() {
             const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -1445,8 +1383,10 @@
             const themeBtn = document.getElementById('themeToggleBtn');
             if (themeBtn) themeBtn.addEventListener('click', handleThemeToggle);
 
+            requestNotificationPermission();
             loadMenuFromSheet();
             renderZoneList();
+            listenForUserChatBackground();
 
             setInterval(() => {
                 loadMenuFromSheet(true);
@@ -1509,7 +1449,6 @@
 
                 if (parsedRows.length < 2) return;
 
-                // دالة تنظيف الخانة وإرجاع الرقم فقط
                 const cleanPrice = (val) => {
                     if (!val) return 0;
                     const match = String(val).replace(/[^0-9.]/g, '');
@@ -1522,16 +1461,13 @@
                     const row = parsedRows[i];
                     if (!row || row.length === 0) continue;
 
-                    // جلب اسم الصنف مباشرة من العمود B (المؤشر 1) أو C (المؤشر 2)
                     let itemName = row[1] || row[2] || "";
                     if (!itemName || itemName.toLowerCase() === 'name') continue;
 
-                    // القراءة المباشرة من أعمدة الشيت المعلنة في الصورة (D, E, F)
                     let pS = cleanPrice(row[3]); // العمود D (سعر S)
                     let pM = cleanPrice(row[4]) || pS; // العمود E (سعر M)
                     let pL = cleanPrice(row[5]) || pM; // العمود F (سعر L)
 
-                    // القسم الافتراضي أو استخراجه من العمود A
                     let catName = row[0] || "بيتزا";
 
                     parsedMenu.push({
@@ -1862,7 +1798,7 @@
             });
 
             localStorage.setItem('mr_hunger_active_order_id', orderId);
-            checkAndRestoreUserOrder();
+            listenForUserChatBackground();
 
             let msg = `*طلب جديد - MR. HUNGER ✨*\n──────────────\n`;
             msg += `👤 *الاسم:* ${n}\n📱 *الموبايل:* ${p}\n🛵 *نوع الطلب:* ${orderType === 'delivery' ? 'دليفري وتوصيل' : 'استلام من الفرع (تيك أواي)'}\n`;
