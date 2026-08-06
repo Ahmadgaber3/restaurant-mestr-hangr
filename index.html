@@ -139,10 +139,10 @@
         .store-status-banner.open { background: #dcfce7; color: #15803d; border-bottom: 1px solid #bbf7d0; }
         .store-status-banner.closed { background: #fee2e2; color: #991b1b; border-bottom: 1px solid #fecaca; }
 
-        .header-left-actions { position: absolute; left: 16px; top: 40px; display: flex; align-items: center; }
+        .header-left-actions { position: absolute; left: 16px; top: 40px; display: flex; align-items: center; gap: 8px; }
         .header-right-actions { position: absolute; right: 16px; top: 40px; display: flex; align-items: center; z-index: 1010; }
 
-        .cart-trigger, .theme-toggle-btn { 
+        .cart-trigger, .theme-toggle-btn, .admin-header-btn { 
             background: var(--input-bg); 
             color: var(--main-text); 
             width: 42px; 
@@ -160,7 +160,7 @@
         }
         
         .theme-toggle-btn * { pointer-events: none; }
-        .cart-trigger:active, .theme-toggle-btn:active { transform: scale(0.92); }
+        .cart-trigger:active, .theme-toggle-btn:active, .admin-header-btn:active { transform: scale(0.92); }
 
         .badge { position: absolute; top: -3px; right: -3px; background: var(--brand-red); color: #ffffff; font-size: 8px; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff; transform: scale(0); }
         .badge.show { transform: scale(1); }
@@ -486,8 +486,6 @@
         .dev-credit { font-size: 0.72rem; color: var(--desc-text); font-weight: 700; }
         .dev-credit a { color: var(--brand-red); text-decoration: none; display: block; margin-top: 3px; }
 
-        .admin-trigger { position: absolute; bottom: 10px; left: 10px; width: 30px; height: 30px; background: transparent; border: none; cursor: pointer; opacity: 0.25; z-index: 999; font-size: 1.1rem; }
-
         /* ================= النوافذ والشات ================= */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: flex-end; backdrop-filter: blur(4px); }
         .modal-content { background: var(--card-inner-bg); color: var(--main-text); width: 100%; max-width: 480px; padding: 18px 20px; border-radius: 24px 22px 0 0; max-height: 85vh; overflow-y: auto; box-shadow: 0 -8px 30px rgba(0,0,0,0.3); }
@@ -498,27 +496,61 @@
         .cart-item-name { font-weight: 800; font-size: 0.85rem; color: var(--main-text); } 
         .cart-item-price { color: var(--brand-red); font-weight: 800; font-size: 0.8rem; display: block; }
         .remove-btn { color: #ef4444; font-weight: 800; font-size: 0.75rem; cursor: pointer; padding: 4px; }
+
+        /* ================= تصميم أزرار الاستلام البسيطة (تيك أواي ودليفري) ================= */
+        .user-fields { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
         
-        .user-fields input, .user-fields textarea { 
+        .user-fields input { 
             background: var(--input-bg); 
             border: 1px solid var(--border-color); 
-            padding: 11px 12px; 
-            border-radius: 10px; 
+            padding: 12px 14px; 
+            border-radius: 12px; 
             width: 100%; 
-            margin-bottom: 8px; 
             color: var(--main-text); 
             text-align: right; 
-            font-size: 0.82rem; 
+            font-size: 0.85rem; 
             font-weight: 700;
             outline: none;
         }
+        .user-fields input:focus { border-color: var(--brand-red); }
 
-        .order-type-container { margin-bottom: 12px; text-align: right; }
-        .order-type-title { font-size: 0.75rem; font-weight: 800; color: var(--desc-text); display: block; margin-bottom: 6px; }
-        .order-type-toggle { display: flex; gap: 10px; width: 100%; }
-        .type-btn { flex: 1; padding: 9px; border-radius: 10px; border: 1.5px solid var(--brand-red); background: var(--brand-red); color: #ffffff; font-weight: 800; font-size: 0.8rem; cursor: default; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .order-type-container { margin-bottom: 4px; text-align: right; }
+        .order-type-title { font-size: 0.78rem; font-weight: 800; color: var(--desc-text); display: block; margin-bottom: 8px; }
+        
+        .order-type-toggle { 
+            display: flex; 
+            gap: 8px; 
+            width: 100%; 
+            background: var(--input-bg); 
+            padding: 4px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border-color);
+        }
+        
+        .type-btn-select { 
+            flex: 1; 
+            padding: 8px 10px; 
+            border-radius: 9px; 
+            border: none; 
+            background: transparent; 
+            color: var(--desc-text); 
+            font-weight: 800; 
+            font-size: 0.8rem; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 5px; 
+            transition: all 0.2s ease;
+        }
 
-        .submit-btn { background: var(--brand-red); color: #ffffff; border: none; padding: 12px; border-radius: 12px; width: 100%; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 12px rgba(229, 83, 0, 0.3); }
+        .type-btn-select.active { 
+            background: var(--card-inner-bg); 
+            color: var(--brand-red); 
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .submit-btn { background: var(--brand-red); color: #ffffff; border: none; padding: 13px; border-radius: 14px; width: 100%; font-weight: 800; font-size: 0.98rem; cursor: pointer; box-shadow: 0 4px 14px rgba(229, 83, 0, 0.35); margin-top: 12px; }
 
         .admin-modal-content {
             background: var(--card-inner-bg);
@@ -754,36 +786,6 @@
             cursor: pointer;
             font-size: 0.8rem;
         }
-
-        /* تنسيقات اختيار نوع الحساب */
-        .role-choice-box {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .role-choice-btn {
-            padding: 12px;
-            border-radius: 12px;
-            border: 1.5px solid var(--border-color);
-            background: var(--input-bg);
-            color: var(--main-text);
-            font-size: 0.9rem;
-            font-weight: 800;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .role-choice-btn.owner {
-            border-color: var(--brand-red);
-            color: var(--brand-red);
-            background: #fff4ed;
-        }
-        [data-theme="dark"] .role-choice-btn.owner {
-            background: #331705;
-        }
     </style>
 </head>
 <body>
@@ -815,7 +817,9 @@
                 <div class="header-logo-final"></div>
             </div>
 
+            <!-- زر السلة وزر لوحة التحكم العلوية -->
             <div class="header-left-actions">
+                <button class="admin-header-btn" onclick="openAdminModal()" title="لوحة التحكم">⚙️</button>
                 <button class="cart-trigger" onclick="toggleCart(true)" id="cartBtn">
                     <span class="badge" id="cartBadge">0</span>
                     <span>🛒</span>
@@ -873,8 +877,6 @@
             Designed by eng / Ahmed Gaber shehata
             <a href="tel:01030252806">📞 01030252806</a>
         </div>
-
-        <button class="admin-trigger" onclick="openAdminModal()">⚙️</button>
     </footer>
 
     <!-- نافذة السلة وإتمام الطلب -->
@@ -883,6 +885,7 @@
             <h3 id="modalTitle" style="margin-bottom: 12px; font-size: 1.05rem; font-weight: 800; color: var(--main-text);">تفاصيل طلبك 🛒</h3>
             <div id="cartItemsList"></div>
             
+            <!-- ملخص الحساب -->
             <div style="margin: 12px 0; padding: 12px 14px; background: var(--input-bg); border-radius: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem; border: 1px solid var(--border-color);">
                 <div style="display: flex; justify-content: space-between; color: var(--main-text);">
                     <span>مجموع الأصناف:</span>
@@ -899,11 +902,17 @@
                 </div>
             </div>
 
+            <!-- خيارات طريقة الاستلام البسيطة -->
             <div class="user-fields">
                 <div class="order-type-container">
-                    <span class="order-type-title">🛵 نوع الطلب:</span>
+                    <span class="order-type-title">طريقة الاستلام:</span>
                     <div class="order-type-toggle">
-                        <div class="type-btn">🛵 دليفري وتوصيل للمنازل</div>
+                        <button type="button" class="type-btn-select active" id="btnDelivery" onclick="setOrderType('delivery')">
+                            🛵 دليفري
+                        </button>
+                        <button type="button" class="type-btn-select" id="btnTakeaway" onclick="setOrderType('takeaway')">
+                            🛍️ تيك أواي
+                        </button>
                     </div>
                 </div>
 
@@ -917,9 +926,8 @@
                 <input type="text" id="uName" placeholder="الاسم بالكامل">
                 <input type="tel" id="uPhone" placeholder="رقم الموبايل">
                 <input type="text" id="uAddr" placeholder="العنوان بالتفصيل (المنطقة / الشارع / الدور)">
-
-                <textarea id="uNotes" rows="2" placeholder="ملاحظات الطلب (مثال: بدون بصل، صوص زيادة)"></textarea>
             </div>
+
             <button class="submit-btn" id="submitOrderBtn" onclick="sendToWA()">تأكيد الطلب عبر واتساب ✨</button>
         </div>
     </div>
@@ -953,28 +961,16 @@
         </div>
     </div>
 
-    <!-- لوحة التحكم الاحترافية الشاملة -->
+    <!-- لوحة التحكم الحصرية بالرقم السري (111222) -->
     <div class="modal" id="adminModal" style="align-items: center;" onclick="if(event.target==this) closeAdminModal()">
         <div class="admin-modal-content">
-            <!-- خطوة 1: اختيار الصفة -->
-            <div id="adminRoleSelectStep">
-                <h3 style="margin-bottom: 10px; font-size: 1rem;">اختر نوع الحساب ⚙️</h3>
-                <div class="role-choice-box">
-                    <button class="role-choice-btn owner" onclick="selectRole('owner')">👑 أنا صاحب المطعم</button>
-                    <button class="role-choice-btn" onclick="selectRole('user')">👤 أنا زبون عادي</button>
-                </div>
-                <button class="admin-btn admin-btn-cancel" onclick="closeAdminModal()" style="margin-top: 15px;">إلغاء</button>
-            </div>
-
-            <!-- خطوة 2: كلمة السر لصاحب المطعم -->
-            <div id="adminLoginStep" style="display: none;">
+            <div id="adminLoginStep">
                 <h3 style="margin-bottom: 10px; font-size: 1rem;">تأكيد هويتك كصاحب مطعم 🔐</h3>
                 <input type="password" id="adminPassInput" placeholder="أدخل الرقم السري" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid var(--border-color); text-align:center; font-weight:bold;">
                 <button class="admin-btn admin-btn-open" onclick="checkAdminPass()">دخول</button>
-                <button class="admin-btn admin-btn-cancel" onclick="showRoleSelectStep()">رجوع</button>
+                <button class="admin-btn admin-btn-cancel" onclick="closeAdminModal()">إلغاء</button>
             </div>
 
-            <!-- خطوة 3: لوحة التحكم -->
             <div id="adminControlStep" style="display: none;">
                 <div class="admin-nav-tabs">
                     <button class="admin-tab-btn active" onclick="switchAdminTab('stockTab', this)">حالة المنيو ⚙️</button>
@@ -1021,6 +1017,7 @@
         ];
 
         let selectedZone = null;
+        let orderType = 'delivery'; // delivery || takeaway
         let deferredPrompt = null;
 
         /* ================= تسجيل Service Worker وتثبيت PWA ================= */
@@ -1078,7 +1075,7 @@
         const db = firebase.database();
 
         const IMAGES_PATH = "./images/"; 
-        const SECRET_PIN = "100200";
+        const SECRET_PIN = "111222"; // تم التحديث إلى 111222
 
         let menuData = [], cart = [];
         let itemSizeSelection = {}; 
@@ -1291,31 +1288,14 @@
             document.getElementById('adminModal').style.display = 'flex';
             const isOwner = localStorage.getItem('mr_hunger_is_owner') === 'true';
             if (isOwner) {
-                document.getElementById('adminRoleSelectStep').style.display = 'none';
                 document.getElementById('adminLoginStep').style.display = 'none';
                 document.getElementById('adminControlStep').style.display = 'block';
                 renderAdminItemsList();
                 renderLiveKitchenOrders();
             } else {
-                showRoleSelectStep();
-            }
-        }
-
-        function showRoleSelectStep() {
-            document.getElementById('adminRoleSelectStep').style.display = 'block';
-            document.getElementById('adminLoginStep').style.display = 'none';
-            document.getElementById('adminControlStep').style.display = 'none';
-        }
-
-        function selectRole(role) {
-            if (role === 'owner') {
-                document.getElementById('adminRoleSelectStep').style.display = 'none';
                 document.getElementById('adminLoginStep').style.display = 'block';
+                document.getElementById('adminControlStep').style.display = 'none';
                 document.getElementById('adminPassInput').value = '';
-                document.getElementById('adminPassInput').focus();
-            } else {
-                alert("أهلاً بك زبوننا العزيز ✨! يمكنك تصفح المنيو ومتابعة أوردراتك بكل سهولة.");
-                closeAdminModal();
             }
         }
 
@@ -1704,6 +1684,30 @@
             updateCart();
         }
 
+        function setOrderType(type) {
+            orderType = type;
+            const btnDel = document.getElementById('btnDelivery');
+            const btnTak = document.getElementById('btnTakeaway');
+            const zoneWrapper = document.getElementById('deliveryZoneWrapper');
+            const addrInput = document.getElementById('uAddr');
+            const deliveryRow = document.getElementById('deliveryRow');
+
+            if (type === 'delivery') {
+                btnDel.classList.add('active');
+                btnTak.classList.remove('active');
+                if (zoneWrapper) zoneWrapper.style.display = 'block';
+                if (addrInput) addrInput.style.display = 'block';
+                if (deliveryRow) deliveryRow.style.display = 'flex';
+            } else {
+                btnTak.classList.add('active');
+                btnDel.classList.remove('active');
+                if (zoneWrapper) zoneWrapper.style.display = 'none';
+                if (addrInput) addrInput.style.display = 'none';
+                if (deliveryRow) deliveryRow.style.display = 'none';
+            }
+            updateCart();
+        }
+
         function preloadAllImages(urls, onProgress, onComplete) {
             if (urls.length === 0) { onComplete(); return; }
             let loadedCount = 0;
@@ -1847,7 +1851,7 @@
             
             currentSubtotal = subtotal;
 
-            if (selectedZone) {
+            if (orderType === 'delivery' && selectedZone) {
                 currentDeliveryCost = selectedZone.price;
             } else {
                 currentDeliveryCost = 0;
@@ -1858,7 +1862,7 @@
             document.getElementById('subtotalAmount').innerText = `${currentSubtotal} ج.م`;
             
             const deliveryTextEl = document.getElementById('deliveryCostText');
-            if (selectedZone && selectedZone.custom) {
+            if (orderType === 'delivery' && selectedZone && selectedZone.custom) {
                 deliveryTextEl.innerText = "يتحدد مع المطعم";
             } else {
                 deliveryTextEl.innerText = `${currentDeliveryCost} ج.م`;
@@ -1873,12 +1877,14 @@
         function sendToWA() {
             const n = document.getElementById('uName').value.trim();
             const p = document.getElementById('uPhone').value.trim();
-            const a = document.getElementById('uAddr').value.trim();
-            const notes = document.getElementById('uNotes') ? document.getElementById('uNotes').value.trim() : "";
+            const a = document.getElementById('uAddr') ? document.getElementById('uAddr').value.trim() : "";
 
             if(!n || !p || cart.length === 0) { alert("برجاء إدخال اسمك ورقم تليفونك أولاً لتأكيد طلبك."); return; }
-            if (!selectedZone) { alert("برجاء اضغط لاختيار منطقة التوصيل أولاً."); return; }
-            if (!a) { alert("برجاء كتابة عنوانك بالتفصيل."); return; }
+            
+            if (orderType === 'delivery') {
+                if (!selectedZone) { alert("برجاء اضغط لاختيار منطقة التوصيل أولاً."); return; }
+                if (!a) { alert("برجاء كتابة عنوانك بالتفصيل."); return; }
+            }
 
             const summaryArr = [];
             const summary = {}; 
@@ -1893,12 +1899,12 @@
             newOrderRef.set({
                 userName: n,
                 userPhone: p,
-                userAddr: a,
-                zone: selectedZone.name,
+                userAddr: orderType === 'delivery' ? a : 'استلام من الفرع',
+                zone: orderType === 'delivery' ? selectedZone.name : 'تيك أواي',
                 deliveryFee: currentDeliveryCost,
                 subtotal: currentSubtotal,
                 totalAmount: currentTotal,
-                notes: notes,
+                orderType: orderType,
                 items: summaryArr,
                 status: 'prep',
                 timestamp: Date.now()
@@ -1908,19 +1914,22 @@
             checkAndRestoreUserOrder();
 
             let msg = `*طلب جديد - MR. HUNGER ✨*\n──────────────\n`;
-            msg += `👤 *الاسم:* ${n}\n📱 *الموبايل:* ${p}\n🛵 *نوع الطلب:* دليفري\n`;
-            msg += `📍 *المنطقة:* ${selectedZone.name}\n📍 *العنوان:* ${a}\n`;
+            msg += `👤 *الاسم:* ${n}\n📱 *الموبايل:* ${p}\n🛵 *نوع الطلب:* ${orderType === 'delivery' ? 'دليفري وتوصيل' : 'استلام من الفرع (تيك أواي)'}\n`;
+            
+            if (orderType === 'delivery') {
+                msg += `📍 *المنطقة:* ${selectedZone.name}\n📍 *العنوان:* ${a}\n`;
+            }
             
             msg += `──────────────\n📦 *الطلبات:*\n`;
             summaryArr.forEach(i => { msg += `• ${i.name} × ${i.qty}\n`; });
-            
-            if(notes) msg += `──────────────\n📝 *ملاحظات:* ${notes}\n`;
 
             msg += `──────────────\n💵 *المجموع:* ${currentSubtotal} جنيه\n`;
-            if (selectedZone.custom) {
-                msg += `🛵 *التوصيل:* يتحدد بواسطة المطعم\n`;
-            } else {
-                msg += `🛵 *التوصيل:* ${currentDeliveryCost} جنيه\n`;
+            if (orderType === 'delivery') {
+                if (selectedZone.custom) {
+                    msg += `🛵 *التوصيل:* يتحدد بواسطة المطعم\n`;
+                } else {
+                    msg += `🛵 *التوصيل:* ${currentDeliveryCost} جنيه\n`;
+                }
             }
             msg += `💰 *الإجمالي:* ${currentTotal} جنيه\n_MR. HUNGER ✨_`;
             
