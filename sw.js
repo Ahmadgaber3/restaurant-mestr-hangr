@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mr-hunger-cache-v6';
+const CACHE_NAME = 'mr-hunger-cache-v7';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

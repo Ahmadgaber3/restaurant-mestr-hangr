@@ -22,9 +22,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     
     <style>
-        /* ================= الثيمات المتغيرة ================= */
+        /* ================= الثيمات المتغيرة (إرجاع الخلفية الداخلية بيضاء بالكامل) ================= */
         :root, [data-theme="light"] {
-            --bg: linear-gradient(180deg, #ffffff 0%, #f1f5f9 50%, #e2e8f0 100%); 
+            --bg: #ffffff; /* خلفية بيضاء ناصعة لكل أجزاء التطبيق من الداخل */
             --card-inner-bg: #ffffff; 
             --card-outer-border: #cbd5e1; 
             --card-text: #0f172a; 
@@ -76,7 +76,6 @@
         
         body { 
             background: var(--bg); 
-            background-attachment: fixed;
             color: var(--main-text); 
             line-height: 1.4; 
             overflow-x: hidden; 
@@ -94,15 +93,16 @@
         
         .loader-content { text-align: center; padding: 20px; max-width: 90%; display: flex; flex-direction: column; align-items: center; }
         
+        /* اللوجو مربع بحواف انسيابية */
         .loader-logo-final {
             width: 210px; 
             height: 210px; 
             margin-bottom: 20px;
             background-image: url('./images/logooo.png');
-            background-size: contain; 
+            background-size: cover; 
             background-position: center;
             background-repeat: no-repeat;
-            border-radius: 16px; 
+            border-radius: 32px; 
             animation: bounceInEntry 1s ease forwards;
         }
         
@@ -122,14 +122,15 @@
         header { display: flex; flex-direction: column; align-items: center; padding: 10px 0 6px 0; position: relative; }
         .header-top { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
         
+        /* لوجو الهيدر المربع بالحواف الانسيابية */
         .header-logo-final { 
-            width: 120px; 
-            height: 120px; 
+            width: 110px; 
+            height: 110px; 
             background-image: url('./images/logooo.png');
-            background-size: contain;
+            background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            border-radius: 12px;
+            border-radius: 22px; 
         }
 
         .store-status-banner {
@@ -198,7 +199,7 @@
         .cat-img-box { 
             width: 68px; 
             height: 68px; 
-            border-radius: 20px; 
+            border-radius: 18px; 
             background: var(--input-bg); 
             overflow: hidden; 
             border: 1.5px solid var(--border-color); 
@@ -227,7 +228,7 @@
         .cat-item.active span { color: var(--main-text); font-weight: 900; }
 
         /* ================= قائمة الكروت ================= */
-        .menu-list { display: flex; flex-direction: column; gap: 12px; padding: 16px; max-width: 600px; margin: auto; min-height: 400px; }
+        .menu-list { display: flex; flex-direction: column; gap: 12px; padding: 16px; max-width: 600px; margin: auto; min-height: 400px; background: transparent; }
         
         .food-card { 
             background: var(--card-inner-bg); 
@@ -346,7 +347,7 @@
         .price-num { font-weight: 900; }
         .price-txt { font-size: 0.72rem; font-weight: 800; color: var(--brand-red); }
 
-        /* ================= شريط تتبع الطلب المرتجع للزبون ================= */
+        /* ================= شريط تتبع الطلب ================= */
         .user-order-tracker-bar {
             position: fixed;
             bottom: 12px;
@@ -668,6 +669,7 @@
             padding-left: 28px;
             font-weight: 800;
             font-size: 0.85rem;
+            color: var(--main-text);
         }
 
         .live-order-status-badge {
@@ -817,7 +819,7 @@
 
     <main id="menuList" class="menu-list"></main>
 
-    <!-- شريط تتبع حالة الطلب للزبون (تم إرجاعه وإعادة تفعيله) -->
+    <!-- شريط تتبع حالة الطلب للزبون -->
     <div class="user-order-tracker-bar" id="userOrderTrackerBar">
         <div class="tracker-header">
             <span>🛵 متابعة حالة أوردرك اللحظية:</span>
@@ -831,7 +833,7 @@
         </button>
     </div>
 
-    <!-- شريط تثبيت التطبيق (PWA Install Bar) -->
+    <!-- شريط تثبيت التطبيق PWA -->
     <div class="pwa-install-bar" id="pwaInstallBar">
         <div class="pwa-info">
             <img src="./images/logooo.png" class="pwa-app-icon" alt="MR. HUNGER App Icon">
